@@ -1,5 +1,4 @@
-// src/home/UserHome.tsx
-import React from "react";
+import React, { useState } from "react";
 import "./UserHome.css";
 
 type Item = {
@@ -8,6 +7,11 @@ type Item = {
   price: number;
   image: string;
   shop: string;
+};
+
+type Props = {
+  name: string;
+  city: string;
 };
 
 const mockItems: Item[] = [
@@ -48,26 +52,99 @@ const mockItems: Item[] = [
   },
 ];
 
-export default function UserHome() {
+const categories = ["Pizza", "Burgers", "Sushi", "Pasta", "Drinks"];
+
+function CategoryButton({
+  category,
+  isActive,
+  onClick,
+}: {
+  category: string;
+  isActive: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      className={`categoryBtn ${isActive ? "active" : ""}`}
+      onClick={onClick}
+    >
+      {category}
+    </button>
+  );
+}
+
+function ItemCard({ item }: { item: Item }) {
+  return (
+    <div className="itemCard">
+      <img src={item.image} alt={item.name} className="itemImage" />
+      <div className="itemInfo">
+        <h3>{item.name}</h3>
+        <p className="shopName">{item.shop}</p>
+        <p className="itemPrice">£{item.price.toFixed(2)}</p>
+        <button className="addBtn">Add to Cart</button>
+      </div>
+    </div>
+  );
+}
+
+export default function UserHome({ name, city }: Props) {
+  const [search, setSearch] = useState("");
+  const [activeCategory, setActiveCategory] = useState("");
+
+  const filteredItems = mockItems.filter(
+    (item) =>
+      (!activeCategory ||
+        item.name.toLowerCase().includes(activeCategory.toLowerCase()) ||
+        item.shop.toLowerCase().includes(activeCategory.toLowerCase())) &&
+      item.name.toLowerCase().includes(search.toLowerCase())
+  );
+
   return (
     <div className="userHome">
+      {/* Navbar */}
+      <nav className="homeNavbar">
+        <div className="navLeft">
+          <h2 className="logo">SwiftEats</h2>
+          <div className="searchWrapper">
+            <input
+              type="text"
+              placeholder="Search for meals..."
+              className="searchInput"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+        </div>
+        <div className="navRight">
+          <button className="logoutBtn">Logout</button>
+        </div>
+      </nav>
+
+      {/* Welcome Banner */}
       <header className="homeHeader">
-        <h1>Welcome to SwiftEats!</h1>
-        <p>Browse items from your favorite shops</p>
+        <h1>Hello, {name}!</h1>
+        <p>Discover delicious meals in {city} 🍔🍕🍣</p>
       </header>
 
-      <div className="itemsGrid">
-        {mockItems.map((item) => (
-          <div key={item.id} className="itemCard">
-            <img src={item.image} alt={item.name} className="itemImage" />
-            <div className="itemInfo">
-              <h3>{item.name}</h3>
-              <p className="shopName">{item.shop}</p>
-              <p className="itemPrice">£{item.price.toFixed(2)}</p>
-              <button className="addBtn">Add to Cart</button>
-            </div>
-          </div>
+      {/* Categories */}
+      <div className="categories">
+        {categories.map((cat) => (
+          <CategoryButton
+            key={cat}
+            category={cat}
+            isActive={activeCategory === cat}
+            onClick={() => setActiveCategory(activeCategory === cat ? "" : cat)}
+          />
         ))}
+      </div>
+
+      {/* Items Grid */}
+      <div className="itemsGrid">
+        {filteredItems.length ? (
+          filteredItems.map((item) => <ItemCard key={item.id} item={item} />)
+        ) : (
+          <p className="noResults">No items match your search 😢</p>
+        )}
       </div>
     </div>
   );

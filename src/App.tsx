@@ -1,15 +1,14 @@
 import { useState, useRef } from "react";
 import "./App.css";
+import UserHome from "./home/UserHome"; // import your new homepage
 
 export default function App() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("");
-  const [step, setStep] = useState<1 | 2 | 3 | 4 | 5>(1);
+  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [city, setCity] = useState("");
   const [agreed, setAgreed] = useState(false);
-  const [fullName, setFullName] = useState("");
-  const [phone, setPhone] = useState("");
   const [loggedIn, setLoggedIn] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const termsRef = useRef<HTMLDivElement>(null);
@@ -49,12 +48,6 @@ export default function App() {
 
   const handleStep3 = () => {
     if (!agreed) return alert("You must agree to the Terms of Service");
-    setStep(4);
-  };
-
-  const handleStep4 = () => {
-    if (!fullName || !phone)
-      return alert("Please enter your full name and phone number");
     setShowConfetti(true);
     setTimeout(() => {
       setShowConfetti(false);
@@ -68,8 +61,6 @@ export default function App() {
     setRole("");
     setCity("");
     setAgreed(false);
-    setFullName("");
-    setPhone("");
     setCanCheckAgree(false);
     setLoggedIn(false);
     setStep(1);
@@ -77,28 +68,14 @@ export default function App() {
 
   // ---------- RENDER ----------
 
-  if (loggedIn) {
+  if (loggedIn && role === "Customer") {
+    // 🚀 Render your full UserHome instead of the old dashboard
     return (
       <div className="app">
-        <div className="dashboard">
-          <h1>🎉 Welcome, {fullName || email}!</h1>
-          <p>
-            Role: <strong>{role}</strong>
-          </p>
-          {role === "Customer" && (
-            <p>
-              City: <strong>{city}</strong>
-            </p>
-          )}
-          <p>
-            Phone: <strong>{phone}</strong>
-          </p>
-
-          <button className="logoutBtn" onClick={handleLogout}>
-            Logout
-          </button>
-        </div>
-
+        <UserHome />
+        <button className="logoutBtn" onClick={handleLogout}>
+          Logout
+        </button>
         {showConfetti && (
           <div className="confetti">
             {Array.from({ length: 100 }).map((_, i) => (
@@ -110,6 +87,28 @@ export default function App() {
             ))}
           </div>
         )}
+      </div>
+    );
+  }
+
+  if (loggedIn && role !== "Customer") {
+    // keep old dashboard for non-customers (Drivers, Staff)
+    return (
+      <div className="app">
+        <div className="dashboard">
+          <h1>🎉 Welcome, {email}!</h1>
+          <p>
+            Role: <strong>{role}</strong>
+          </p>
+          {role === "Customer" && (
+            <p>
+              City: <strong>{city}</strong>
+            </p>
+          )}
+          <button className="logoutBtn" onClick={handleLogout}>
+            Logout
+          </button>
+        </div>
       </div>
     );
   }
@@ -247,40 +246,6 @@ export default function App() {
               onClick={handleStep3}
             >
               Accept & Continue
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // ---------- STEP 4: PROFILE DETAILS ----------
-  if (step === 4) {
-    return (
-      <div className="app">
-        <div className="loginCard">
-          <h1 className="logo">Profile Details</h1>
-          <p className="subtitle">Please fill out your information</p>
-
-          <input
-            type="text"
-            placeholder="Full Name"
-            value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
-          />
-          <input
-            type="text"
-            placeholder="Phone Number"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-          />
-
-          <div style={{ display: "flex", justifyContent: "space-between" }}>
-            <button className="loginBtn" onClick={() => setStep(3)}>
-              Back
-            </button>
-            <button className="loginBtn" onClick={handleStep4}>
-              Finish
             </button>
           </div>
         </div>
