@@ -174,13 +174,26 @@ export default function App() {
   // ---------- Step 2: Skip City for Non-Customers ----------
   if (step === 2 && role !== "Customer") setStep(3);
 
-  // ---------- Step 3: Terms ----------
+  // ---------- STEP 3: TERMS ----------
   if (step === 3) {
     return (
       <div className="app">
         <div className="termsCard">
           <h1 className="termsTitle">Terms of Service</h1>
-          <div className="termsBox" ref={termsRef} onScroll={handleTermsScroll}>
+
+          <div
+            className="termsBox"
+            ref={termsRef}
+            onScroll={() => {
+              if (termsRef.current) {
+                const { scrollTop, scrollHeight, clientHeight } =
+                  termsRef.current;
+                if (scrollTop + clientHeight >= scrollHeight - 5) {
+                  setCanCheckAgree(true);
+                }
+              }
+            }}
+          >
             <p>
               Welcome to <strong>SwiftEats</strong>! By signing up, you agree to
               our terms and conditions.
@@ -194,16 +207,21 @@ export default function App() {
               erat, at sollicitudin nisl nisl at elit.
             </p>
             <p>
-              Add more content here to ensure scrolling is required before
-              accepting.
+              Vestibulum ante ipsum primis in faucibus orci luctus et ultrices
+              posuere cubilia curae; Pellentesque habitant morbi tristique
+              senectus et netus et malesuada fames ac turpis egestas.
+            </p>
+            <p>
+              Add more content here so the user must scroll to the bottom before
+              enabling the checkbox.
             </p>
           </div>
 
           <label className="agreeLabel">
             <input
               type="checkbox"
-              disabled={!canCheckAgree}
               checked={agreed}
+              disabled={!canCheckAgree}
               onChange={(e) => setAgreed(e.target.checked)}
             />
             I have read and agree to the Terms of Service
