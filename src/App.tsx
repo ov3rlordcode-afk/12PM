@@ -5,285 +5,217 @@ export default function App() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("");
-  const [isSignup, setIsSignup] = useState(false);
+  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
+  const [city, setCity] = useState("");
+  const [agreed, setAgreed] = useState(false);
   const [loggedIn, setLoggedIn] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
-
-  // Customer delivery
-  const [city, setCity] = useState("");
-  const [deliveryAddress, setDeliveryAddress] = useState("");
-
-  // Terms
-  const [showTerms, setShowTerms] = useState(false);
-  const [agreed, setAgreed] = useState(false);
   const termsRef = useRef<HTMLDivElement>(null);
   const [canCheckAgree, setCanCheckAgree] = useState(false);
 
-  const cities = ["New York", "Los Angeles", "Chicago", "Houston", "Miami"];
+  const scotlandCities = [
+    "Edinburgh",
+    "Musselburgh",
+    "Dalkeith",
+    "Bonnyrigg",
+    "Livingston",
+    "Bathgate",
+    "Linlithgow",
+  ];
 
-  // ---------------- LOGIN ----------------
-  const handleLogin = () => {
-    if (email && password && role) {
-      setLoggedIn(true);
-    } else {
-      alert("Please enter email, password and select role");
-    }
-  };
-
-  // ---------------- SIGNUP ----------------
-  const handleSignup = () => {
+  // ---------- HANDLERS ----------
+  const handleStep1 = () => {
     if (!email || !password) return alert("Please enter email and password");
     if (!role) return alert("Please select a role");
-    if (!agreed) return alert("You must agree to the Terms of Service");
+    setStep(2);
+  };
 
-    setShowConfetti(true);
-
-    setTimeout(() => {
-      setShowConfetti(false);
-      alert(`Signed up as ${role}! You can now login.`);
-      setIsSignup(false);
-      setEmail("");
-      setPassword("");
-      setRole("");
-      setShowTerms(false);
-      setAgreed(false);
-    }, 2000);
+  const handleStep2 = () => {
+    if (role === "Customer" && !city)
+      return alert("Please select your city (Scotland only)");
+    setStep(3);
   };
 
   const handleTermsScroll = () => {
     const el = termsRef.current;
-    if (el && el.scrollTop + el.clientHeight >= el.scrollHeight) {
+    if (el && el.scrollTop + el.clientHeight >= el.scrollHeight - 5) {
       setCanCheckAgree(true);
     }
   };
 
-  // ---------------- ROLE THEMES ----------------
-  const bgGradient =
-    role === "Customer"
-      ? "linear-gradient(135deg, #ff5f6d, #ffc371)"
-      : role === "Driver"
-      ? "linear-gradient(135deg, #4facfe, #00f2fe)"
-      : role === "Staff"
-      ? "linear-gradient(135deg, #43e97b, #38f9d7)"
-      : role === "Store"
-      ? "linear-gradient(135deg, #fa709a, #fee140)"
-      : "linear-gradient(135deg, #667eea, #764ba2)";
+  const handleStep3 = () => {
+    if (!agreed) return alert("You must agree to the Terms of Service");
+    setStep(4);
+    setShowConfetti(true);
+    setTimeout(() => {
+      setShowConfetti(false);
+      setLoggedIn(true);
+    }, 2500);
+  };
 
-  const floatingIcons =
-    role === "Customer"
-      ? ["🍔", "🍕", "🍣", "🥗"]
-      : role === "Driver"
-      ? ["🚗", "🛵", "🚚", "🚕"]
-      : role === "Staff"
-      ? ["📦", "🧾", "📊", "💼"]
-      : role === "Store"
-      ? ["🏪", "🛒", "🍽️", "📋"]
-      : [];
+  const handleLogout = () => {
+    setEmail("");
+    setPassword("");
+    setRole("");
+    setCity("");
+    setAgreed(false);
+    setCanCheckAgree(false);
+    setLoggedIn(false);
+    setStep(1);
+  };
 
-  const confettiColors =
-    role === "Customer"
-      ? ["#FF6B6B", "#FFD93D", "#FF9F1C", "#FF5F6D"]
-      : role === "Driver"
-      ? ["#4facfe", "#00f2fe", "#6dd5ed", "#00c3ff"]
-      : role === "Staff"
-      ? ["#43e97b", "#38f9d7", "#2af598", "#009efd"]
-      : role === "Store"
-      ? ["#fa709a", "#fee140", "#f093fb", "#f5576c"]
-      : ["#667eea", "#764ba2"];
+  // ---------- RENDER ----------
 
-  // ---------------- DASHBOARD ----------------
   if (loggedIn) {
     return (
-      <div className="app" style={{ background: bgGradient }}>
+      <div className="app">
         <div className="dashboard">
-          <h1>
-            Welcome, {email}!{" "}
-            {role === "Customer"
-              ? "🍕"
-              : role === "Driver"
-              ? "🚗"
-              : role === "Staff"
-              ? "📦"
-              : "🏪"}
-          </h1>
-
+          <h1>🎉 Welcome, {email}!</h1>
           <p>
-            {role === "Customer" &&
-              "Select your city and delivery location to start ordering!"}
-            {role === "Driver" && "View delivery requests and start earning!"}
-            {role === "Staff" && "Manage orders and monitor system activity."}
-            {role === "Store" && "Manage your store, menu and incoming orders."}
+            Role: <strong>{role}</strong>
           </p>
-
-          {/* CUSTOMER DELIVERY */}
           {role === "Customer" && (
-            <div className="deliverySection">
-              <select value={city} onChange={(e) => setCity(e.target.value)}>
-                <option value="">Select a city</option>
-                {cities.map((c, i) => (
-                  <option key={i} value={c}>
-                    {c}
-                  </option>
-                ))}
-              </select>
-
-              <input
-                type="text"
-                placeholder="Enter delivery address"
-                value={deliveryAddress}
-                onChange={(e) => setDeliveryAddress(e.target.value)}
-              />
-
-              {city && deliveryAddress && (
-                <div className="mapPlaceholder">
-                  Delivering to <strong>{deliveryAddress}</strong> in{" "}
-                  <strong>{city}</strong>
-                </div>
-              )}
-            </div>
+            <p>
+              City: <strong>{city}</strong>
+            </p>
           )}
 
-          {/* FLOATING ICONS */}
-          <div className="floatingIcons">
-            {floatingIcons.map((icon, i) => (
-              <span key={i} className="floatIcon">
-                {icon}
-              </span>
+          <button className="logoutBtn" onClick={handleLogout}>
+            Logout
+          </button>
+        </div>
+
+        {showConfetti && (
+          <div className="confetti">
+            {Array.from({ length: 100 }).map((_, i) => (
+              <span
+                key={i}
+                className="confettiPiece"
+                style={{ "--i": i } as any}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // ---------- Step 1: Email / Password + Role ----------
+  if (step === 1) {
+    return (
+      <div className="app">
+        <div className="loginCard">
+          <h1 className="logo">SwiftEats</h1>
+          <p className="subtitle">
+            Enter your email, password, and select a role
+          </p>
+
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+
+          <div className="roleSelection">
+            {["Customer", "Driver", "Staff", "Store"].map((r) => (
+              <label key={r}>
+                <input
+                  type="radio"
+                  name="role"
+                  value={r}
+                  checked={role === r}
+                  onChange={(e) => setRole(e.target.value)}
+                />
+                <span>{r}</span>
+              </label>
             ))}
           </div>
 
-          <button
-            className="logoutBtn"
-            onClick={() => {
-              setLoggedIn(false);
-              setEmail("");
-              setPassword("");
-              setRole("");
-            }}
-          >
-            Logout
+          <button className="loginBtn" onClick={handleStep1}>
+            Next
           </button>
         </div>
       </div>
     );
   }
 
-  // ---------------- TERMS PAGE ----------------
-  if (showTerms) {
+  // ---------- Step 2: City (Customer Only) ----------
+  if (step === 2 && role === "Customer") {
     return (
       <div className="app">
-        <div className="loginCard termsCard">
-          <h2>Terms of Service</h2>
+        <div className="loginCard">
+          <h1 className="logo">Choose Your City</h1>
+          <p className="subtitle">Only Midlothian / West Lothian cities</p>
 
+          <select value={city} onChange={(e) => setCity(e.target.value)}>
+            <option value="">Select your city</option>
+            {scotlandCities.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </select>
+
+          <button className="loginBtn" onClick={handleStep2}>
+            Next
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // ---------- Step 2: Skip City for Non-Customers ----------
+  if (step === 2 && role !== "Customer") setStep(3);
+
+  // ---------- Step 3: Terms ----------
+  if (step === 3) {
+    return (
+      <div className="app">
+        <div className="termsCard">
+          <h1 className="termsTitle">Terms of Service</h1>
           <div className="termsBox" ref={termsRef} onScroll={handleTermsScroll}>
             <p>
-              Welcome to SwiftEats. By signing up, you agree to follow all
-              platform rules, policies, and guidelines.
+              Welcome to <strong>SwiftEats</strong>! By signing up, you agree to
+              our terms and conditions.
             </p>
             <p>
-              Users must provide accurate information. Drivers must deliver
-              responsibly. Staff and Store accounts must manage operations
-              professionally.
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec nec
+              felis nec nisl fermentum fermentum.
             </p>
             <p>
-              Continued usage of this platform means you accept all terms and
-              future updates.
+              Curabitur auctor, justo at tincidunt luctus, lectus lorem porta
+              erat, at sollicitudin nisl nisl at elit.
             </p>
-            <p>Scroll to the bottom to enable agreement checkbox.</p>
+            <p>
+              Add more content here to ensure scrolling is required before
+              accepting.
+            </p>
           </div>
 
-          <label>
+          <label className="agreeLabel">
             <input
               type="checkbox"
               disabled={!canCheckAgree}
               checked={agreed}
               onChange={(e) => setAgreed(e.target.checked)}
             />
-            I agree to the Terms of Service
+            I have read and agree to the Terms of Service
           </label>
 
-          <button disabled={!agreed} onClick={handleSignup}>
-            Complete Sign Up
+          <button className="loginBtn" disabled={!agreed} onClick={handleStep3}>
+            Accept & Continue
           </button>
         </div>
       </div>
     );
   }
 
-  // ---------------- LOGIN / SIGNUP PAGE ----------------
-  return (
-    <div className="app">
-      {showConfetti && (
-        <div className="confetti">
-          {Array.from({ length: 80 }).map((_, i) => (
-            <span
-              key={i}
-              className="confettiPiece"
-              style={{
-                backgroundColor: confettiColors[i % confettiColors.length],
-              }}
-            ></span>
-          ))}
-        </div>
-      )}
-
-      <div className="loginCard">
-        <h1>SwiftEats</h1>
-        <p>{isSignup ? "Create your account" : "Login to continue"}</p>
-
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-
-        {/* ROLE SELECTION FOR BOTH LOGIN & SIGNUP */}
-        <div className="roleSelection">
-          {["Customer", "Driver", "Staff", "Store"].map((r) => (
-            <label key={r}>
-              <input
-                type="radio"
-                name="role"
-                value={r}
-                checked={role === r}
-                onChange={(e) => setRole(e.target.value)}
-              />
-              <span>{r}</span>
-            </label>
-          ))}
-        </div>
-
-        <button
-          onClick={() => {
-            if (isSignup) {
-              if (!email || !password || !role) return alert("Fill all fields");
-              setShowTerms(true);
-            } else {
-              handleLogin();
-            }
-          }}
-        >
-          {isSignup ? "Sign Up" : "Login"}
-        </button>
-
-        <p>
-          {isSignup ? "Already have an account?" : "Don't have an account?"}{" "}
-          <span
-            style={{ cursor: "pointer", fontWeight: "bold" }}
-            onClick={() => setIsSignup(!isSignup)}
-          >
-            {isSignup ? "Login" : "Sign Up"}
-          </span>
-        </p>
-      </div>
-    </div>
-  );
+  return null;
 }
