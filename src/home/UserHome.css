@@ -1,0 +1,96 @@
+/* UserHome.css */
+.userHome {
+  padding: 30px;
+  font-family: "Arial", sans-serif;
+  background: #f6f6f6;
+  min-height: 100vh;
+}
+
+.homeHeader {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.homeHeader h1 {
+  font-size: 2.5rem;
+  color: #ff5f6d;
+}
+
+.homeHeader p {
+  font-size: 1.2rem;
+  color: #555;
+}
+
+.itemsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 25px;
+}
+
+.itemCard {
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.itemCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+}
+
+.itemImage {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+}
+
+.itemInfo {
+  padding: 15px;
+  text-align: center;
+}
+
+.itemInfo h3 {
+  font-size: 1.1rem;
+  margin: 10px 0 5px;
+  color: #333;
+}
+
+.shopName {
+  font-size: 0.9rem;
+  color: #888;
+  margin-bottom: 10px;
+}
+
+.itemPrice {
+  font-size: 1rem;
+  font-weight: bold;
+  color: #ff5f6d;
+  margin-bottom: 10px;
+}
+
+.addBtn {
+  padding: 10px 15px;
+  border: none;
+  background: linear-gradient(135deg, #ff5f6d, #ff3b50);
+  color: #fff;
+  font-weight: bold;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: transform 0.2s, background 0.3s;
+}
+
+.addBtn:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, #ff3b50, #ff1a2b);
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .itemsGrid {
+    grid-template-columns: 1fr;
+  }
+}
