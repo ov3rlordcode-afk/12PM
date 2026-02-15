@@ -115,7 +115,16 @@ export default function UserHome({ name, city }: Props) {
             />
           </div>
         </div>
+
+        {/* Right menu items */}
         <div className="navRight">
+          <ul className="navMenu">
+            <li>Feature Shops</li>
+            <li>About</li>
+            <li>Support</li>
+            <li>Privacy</li>
+            <li>Terms</li>
+          </ul>
           <button className="logoutBtn">Logout</button>
         </div>
       </nav>
