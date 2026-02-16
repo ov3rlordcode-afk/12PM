@@ -20,54 +20,15 @@ type Props = {
 
 const mockItems: Item[] = [
   {
-    id: 1,
-    name: "Milk",
-    price: 1.2,
-    image: "/images/milk.jpg",
-    shop: "Asda - High Street",
-    brand: "Asda",
-    type: "Grocery",
-    shopImage:
-      "https://static.where-e.com/United_Kingdom/Asda-Straiton-Superstore_0c7dbd6b34741eaee989aa4992a9f6d5.jpg",
-    openHours: {
-      Mon: { open: "08:00", close: "20:00" },
-      Tue: { open: "08:00", close: "20:00" },
-      Wed: { open: "08:00", close: "20:00" },
-      Thu: { open: "08:00", close: "20:00" },
-      Fri: { open: "08:00", close: "21:00" },
-      Sat: { open: "08:00", close: "21:00" },
-      Sun: { open: "10:00", close: "18:00" },
-    },
-  },
-  {
-    id: 2,
-    name: "Eggs",
-    price: 2.5,
-    image: "/images/eggs.jpg",
-    shop: "Asda - Main Square",
-    brand: "Asda",
-    type: "Grocery",
-    shopImage:
-      "https://static.where-e.com/United_Kingdom/Asda-Straiton-Superstore_0c7dbd6b34741eaee989aa4992a9f6d5.jpg",
-    openHours: {
-      Mon: { open: "08:00", close: "20:00" },
-      Tue: { open: "08:00", close: "20:00" },
-      Wed: { open: "08:00", close: "20:00" },
-      Thu: { open: "08:00", close: "20:00" },
-      Fri: { open: "08:00", close: "21:00" },
-      Sat: { open: "08:00", close: "21:00" },
-      Sun: { open: "10:00", close: "18:00" },
-    },
-  },
-  {
     id: 3,
     name: "Bread",
     price: 1.0,
     image: "/images/bread.jpg",
-    shop: "Tesco - Downtown",
-    brand: "Tesco",
+    shop: "Asda Straiton Superstore",
+    brand: "Asda",
     type: "Grocery",
-    shopImage: "/images/tesco.jpg",
+    shopImage:
+      "https://static.where-e.com/United_Kingdom/Asda-Straiton-Superstore_0c7dbd6b34741eaee989aa4992a9f6d5.jpg",
     openHours: {
       Mon: { open: "07:00", close: "22:00" },
       Tue: { open: "07:00", close: "22:00" },
