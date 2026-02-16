@@ -16,6 +16,7 @@ type Item = {
 type Props = {
   name: string;
   city: string;
+  onLogout: () => void; // Pass the logout handler from App
 };
 
 const mockItems: Item[] = [
@@ -43,6 +44,7 @@ const mockItems: Item[] = [
 
 const categories = ["All", "Grocery", "PC Supplies", "Drinks", "Desserts"];
 
+// -- Category Button --
 function CategoryButton({
   category,
   isActive,
@@ -62,6 +64,7 @@ function CategoryButton({
   );
 }
 
+// -- Brand Card --
 function BrandCard({
   brandName,
   items,
@@ -84,6 +87,7 @@ function BrandCard({
   );
 }
 
+// -- Location Card --
 function LocationCard({
   shopName,
   shopImage,
@@ -156,6 +160,7 @@ function LocationCard({
   );
 }
 
+// -- Item Card --
 function ItemCard({
   item,
   onAddToCart,
@@ -187,7 +192,8 @@ function ItemCard({
   );
 }
 
-export default function UserHome({ name, city }: Props) {
+// -- UserHome Component --
+export default function UserHome({ name, city, onLogout }: Props) {
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
   const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
@@ -195,13 +201,9 @@ export default function UserHome({ name, city }: Props) {
   const [shopCategory, setShopCategory] = useState("All");
   const [cart, setCart] = useState<Item[]>([]);
 
-  const addToCart = (item: Item) => {
-    setCart((prev) => [...prev, item]);
-  };
-
-  const removeFromCart = (index: number) => {
+  const addToCart = (item: Item) => setCart((prev) => [...prev, item]);
+  const removeFromCart = (index: number) =>
     setCart((prev) => prev.filter((_, i) => i !== index));
-  };
 
   const filteredItems = mockItems.filter((item) => {
     const matchesSearch =
@@ -242,7 +244,7 @@ export default function UserHome({ name, city }: Props) {
   const totalPrice = cart.reduce((sum, item) => sum + item.price, 0);
 
   return (
-    <div className="userHome">
+    <div className="userHome app">
       {/* Navbar */}
       <nav className="homeNavbar">
         <div className="navLeft" style={{ position: "relative" }}>
@@ -278,7 +280,9 @@ export default function UserHome({ name, city }: Props) {
             <li>About</li>
             <li>Support</li>
           </ul>
-          <button className="logoutBtn">Logout</button>
+          <button className="logoutBtn" onClick={onLogout}>
+            Logout
+          </button>
         </div>
       </nav>
 
@@ -357,21 +361,7 @@ export default function UserHome({ name, city }: Props) {
 
       {/* Floating Cart */}
       {cart.length > 0 && (
-        <div
-          className="cartButton"
-          style={{
-            position: "fixed",
-            bottom: "20px",
-            right: "20px",
-            backgroundColor: "#FF5722",
-            color: "white",
-            padding: "15px 25px",
-            borderRadius: "30px",
-            boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
-            cursor: "pointer",
-            zIndex: 1000,
-          }}
-        >
+        <div className="cartButton">
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
             🛒 {cart.length} items | £{totalPrice.toFixed(2)}
           </div>
