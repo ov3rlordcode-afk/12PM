@@ -35,10 +35,7 @@ export default function App() {
 
   const handleStep2 = () => {
     if (role === "Customer" && !city) return alert("Please select your city");
-    if (role === "Customer") {
-      setStep(3); // Go to address
-      return;
-    }
+    if (role === "Customer") return setStep(3); // Go to address
     setStep(4); // Non-Customer goes to Terms
   };
 
@@ -75,16 +72,26 @@ export default function App() {
     setStep(1);
   };
 
-  // ---------- RENDER ----------
-
-  // Logged-in views
-  if (loggedIn && role === "Customer") {
+  // ---------- LOGGED-IN VIEWS ----------
+  if (loggedIn) {
     return (
       <div className="app">
-        <UserHome name={email} city={city} address={address} />
+        <div className="dashboardWrapper">
+          {role === "Customer" && (
+            <UserHome name={email} city={city} address={address} />
+          )}
+          {role === "Driver" && <DriverDashboard />}
+          {role === "Staff" && (
+            <div className="dashboard">
+              <h1>Welcome, {email} (Staff)</h1>
+            </div>
+          )}
+        </div>
+
         <button className="logoutBtn" onClick={handleLogout}>
           Logout
         </button>
+
         {showConfetti && (
           <div className="confetti">
             {Array.from({ length: 100 }).map((_, i) => (
@@ -100,31 +107,7 @@ export default function App() {
     );
   }
 
-  if (loggedIn && role === "Driver") {
-    return (
-      <div className="app">
-        <DriverDashboard />
-        <button className="logoutBtn" onClick={handleLogout}>
-          Logout
-        </button>
-      </div>
-    );
-  }
-
-  if (loggedIn && role === "Staff") {
-    return (
-      <div className="app">
-        <div className="dashboard">
-          <h1>Welcome, {email} (Staff)</h1>
-          <button className="logoutBtn" onClick={handleLogout}>
-            Logout
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // ---------- Step 1: Email + Role ----------
+  // ---------- STEP 1: Email + Role ----------
   if (step === 1) {
     return (
       <div className="app">
@@ -167,7 +150,7 @@ export default function App() {
     );
   }
 
-  // ---------- Step 2: City (Customer) ----------
+  // ---------- STEP 2: City ----------
   if (step === 2 && role === "Customer") {
     return (
       <div className="app">
@@ -182,7 +165,7 @@ export default function App() {
               </option>
             ))}
           </select>
-          <div style={{ display: "flex", justifyContent: "space-between" }}>
+          <div className="btnRow">
             <button className="loginBtn" onClick={() => setStep(1)}>
               Back
             </button>
@@ -195,7 +178,7 @@ export default function App() {
     );
   }
 
-  // ---------- Step 3: Address (Customer) ----------
+  // ---------- STEP 3: Address ----------
   if (step === 3 && role === "Customer") {
     return (
       <div className="app">
@@ -207,7 +190,7 @@ export default function App() {
             value={address}
             onChange={(e) => setAddress(e.target.value)}
           />
-          <div style={{ display: "flex", justifyContent: "space-between" }}>
+          <div className="btnRow">
             <button className="loginBtn" onClick={() => setStep(2)}>
               Back
             </button>
@@ -220,21 +203,13 @@ export default function App() {
     );
   }
 
-  // ---------- Step 4: Terms ----------
+  // ---------- STEP 4: Terms ----------
   if (step === 4) {
     return (
       <div className="app">
         <div className="termsCard">
           <h1 className="termsTitle">Terms of Service</h1>
-          <div
-            className="termsBox"
-            ref={termsRef}
-            onScroll={() => {
-              const el = termsRef.current;
-              if (el && el.scrollTop + el.clientHeight >= el.scrollHeight - 5)
-                setCanCheckAgree(true);
-            }}
-          >
+          <div className="termsBox" ref={termsRef} onScroll={handleTermsScroll}>
             <p>
               Welcome to <strong>SwiftEats</strong>! By signing up, you agree to
               our terms.
@@ -257,6 +232,7 @@ export default function App() {
               enabling the checkbox.
             </p>
           </div>
+
           <label className="agreeLabel">
             <input
               type="checkbox"
@@ -266,7 +242,8 @@ export default function App() {
             />
             I have read and agree to the Terms of Service
           </label>
-          <div style={{ display: "flex", justifyContent: "space-between" }}>
+
+          <div className="btnRow">
             <button
               className="loginBtn"
               onClick={() => setStep(role === "Customer" ? 3 : 2)}
