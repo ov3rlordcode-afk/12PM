@@ -16,7 +16,7 @@ type Item = {
 type Props = {
   name: string;
   city: string;
-  onLogout: () => void; // Pass the logout handler from App
+  onLogout: () => void;
 };
 
 const mockItems: Item[] = [
@@ -87,7 +87,7 @@ function BrandCard({
   );
 }
 
-// -- Location Card --
+// -- Location Card with Open Hours Hidden by Default --
 function LocationCard({
   shopName,
   shopImage,
@@ -99,6 +99,8 @@ function LocationCard({
   openHours: Record<string, { open: string; close: string }>;
   onSelectShop: () => void;
 }) {
+  const [showHours, setShowHours] = useState(false);
+
   const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const now = new Date();
   const day = days[now.getDay()];
@@ -127,22 +129,30 @@ function LocationCard({
             ({isOpen ? "Open" : "Closed"})
           </span>
         </p>
-        <div className="weeklyHours">
-          {Object.entries(openHours).map(([dayName, hours]) => (
-            <p
-              key={dayName}
-              style={{ fontWeight: dayName === day ? "bold" : "normal" }}
-            >
-              {dayName}: {hours.open} - {hours.close}
-            </p>
-          ))}
-        </div>
+
+        {/* Toggle Open Hours */}
+        {showHours && (
+          <div className="weeklyHours">
+            {Object.entries(openHours).map(([dayName, hours]) => (
+              <p
+                key={dayName}
+                style={{ fontWeight: dayName === day ? "bold" : "normal" }}
+              >
+                {dayName}: {hours.open} - {hours.close}
+              </p>
+            ))}
+          </div>
+        )}
+
         <button
           className="addBtn"
           style={{ marginTop: "10px" }}
-          onClick={onSelectShop}
+          onClick={() => {
+            setShowHours(!showHours); // toggle open hours
+            onSelectShop(); // open the shop menu
+          }}
         >
-          Open Menu
+          {showHours ? "Hide Open Times" : "View Open Times"}
         </button>
         <button
           className="addBtn"
