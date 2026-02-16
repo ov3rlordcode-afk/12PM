@@ -50,9 +50,54 @@ const mockItems: Item[] = [
     image: "/images/coffee.jpg",
     shop: "Coffee Corner",
   },
+  {
+    id: 6,
+    name: "Chicken Tikka",
+    price: 10.5,
+    image: "/images/tikka.jpg",
+    shop: "Spice Route",
+  },
+  {
+    id: 7,
+    name: "Chocolate Cake",
+    price: 4.0,
+    image: "/images/cake.jpg",
+    shop: "Sweet Tooth",
+  },
+  {
+    id: 8,
+    name: "Caesar Salad",
+    price: 7.5,
+    image: "/images/salad.jpg",
+    shop: "Green Bowl",
+  },
+  {
+    id: 9,
+    name: "Fish & Chips",
+    price: 9.0,
+    image: "/images/fish.jpg",
+    shop: "Ocean's Catch",
+  },
+  {
+    id: 10,
+    name: "Latte",
+    price: 3.8,
+    image: "/images/latte.jpg",
+    shop: "Coffee Corner",
+  },
 ];
 
-const categories = ["Pizza", "Burgers", "Sushi", "Pasta", "Drinks"];
+const categories = [
+  "Pizza",
+  "Burgers",
+  "Sushi",
+  "Pasta",
+  "Drinks",
+  "Desserts",
+  "Salads",
+  "Indian",
+  "Seafood",
+];
 
 function CategoryButton({
   category,
@@ -91,13 +136,20 @@ export default function UserHome({ name, city }: Props) {
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("");
 
-  const filteredItems = mockItems.filter(
-    (item) =>
-      (!activeCategory ||
-        item.name.toLowerCase().includes(activeCategory.toLowerCase()) ||
-        item.shop.toLowerCase().includes(activeCategory.toLowerCase())) &&
-      item.name.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredItems = mockItems.filter((item) => {
+    // Search matches item name OR shop name
+    const matchesSearch =
+      item.name.toLowerCase().includes(search.toLowerCase()) ||
+      item.shop.toLowerCase().includes(search.toLowerCase());
+
+    // Category filter
+    const matchesCategory =
+      !activeCategory ||
+      item.name.toLowerCase().includes(activeCategory.toLowerCase()) ||
+      item.shop.toLowerCase().includes(activeCategory.toLowerCase());
+
+    return matchesSearch && matchesCategory;
+  });
 
   return (
     <div className="userHome">
@@ -108,7 +160,7 @@ export default function UserHome({ name, city }: Props) {
           <div className="searchWrapper">
             <input
               type="text"
-              placeholder="Search for meals..."
+              placeholder="Search for items or shops..."
               className="searchInput"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -116,7 +168,6 @@ export default function UserHome({ name, city }: Props) {
           </div>
         </div>
 
-        {/* Right menu items */}
         <div className="navRight">
           <ul className="navMenu">
             <li>Feature Shops</li>
@@ -152,7 +203,7 @@ export default function UserHome({ name, city }: Props) {
         {filteredItems.length ? (
           filteredItems.map((item) => <ItemCard key={item.id} item={item} />)
         ) : (
-          <p className="noResults">No items match your search 😢</p>
+          <p className="noResults">No items or shops match your search 😢</p>
         )}
       </div>
     </div>

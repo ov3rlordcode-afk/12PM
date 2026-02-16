@@ -12,26 +12,33 @@
   align-items: center;
   font-family: "Inter", sans-serif;
   font-size: 14px;
-  box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 /* =========================
-   NAVBAR
+   NAVBAR (STICKY)
 ========================= */
 .homeNavbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
   width: 100%;
   max-width: 1200px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 35px;
+  margin-bottom: 40px;
   flex-wrap: wrap;
+  background: rgba(10, 15, 27, 0.95); /* slightly opaque for sticky effect */
+  padding: 10px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
+/* Left: logo + search input */
 .navLeft {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 20px;
   flex-wrap: wrap;
 }
 
@@ -46,10 +53,12 @@
 .searchWrapper {
   display: flex;
   align-items: center;
+  flex: 1;
 }
 
 .searchInput {
-  width: 200px;
+  width: 220px;
+  max-width: 100%;
   padding: 6px 12px;
   border-radius: 6px;
   border: 1px solid rgba(255, 255, 255, 0.06);
@@ -67,17 +76,21 @@
   box-shadow: 0 0 0 2px rgba(255, 77, 109, 0.2);
 }
 
+/* Right: menu + logout */
 .navRight {
   display: flex;
   align-items: center;
   gap: 20px;
   flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
+/* Menu items */
 .navMenu {
   display: flex;
+  align-items: center;
   list-style: none;
-  gap: 15px;
+  gap: 16px;
   margin: 0;
   padding: 0;
   flex-wrap: wrap;
@@ -87,7 +100,6 @@
   cursor: pointer;
   font-size: 0.9rem;
   color: #e2e8f0;
-  line-height: 1;
   transition: color 0.2s;
 }
 
@@ -95,6 +107,7 @@
   color: #ff4d6d;
 }
 
+/* Logout button */
 .logoutBtn {
   padding: 6px 12px;
   border-radius: 6px;
@@ -120,7 +133,7 @@
 ========================= */
 .homeHeader {
   text-align: center;
-  margin-bottom: 35px;
+  margin-bottom: 40px;
   max-width: 700px;
 }
 
@@ -135,7 +148,7 @@
 
 .homeHeader p {
   font-size: 0.95rem;
-  margin-top: 8px;
+  margin-top: 10px;
   color: #cbd5e1;
 }
 
@@ -147,11 +160,11 @@
   justify-content: center;
   flex-wrap: wrap;
   gap: 10px;
-  margin-bottom: 25px;
+  margin-bottom: 30px;
 }
 
 .categoryBtn {
-  padding: 5px 12px;
+  padding: 6px 14px;
   border-radius: 16px;
   border: 1px solid #ff4d6d;
   background: rgba(15, 23, 42, 0.9);
@@ -169,7 +182,7 @@
 .categoryBtn.active {
   background: #ff4d6d;
   color: #fff;
-  box-shadow: 0 2px 8px rgba(255, 77, 109, 0.4);
+  box-shadow: 0 3px 10px rgba(255, 77, 109, 0.4);
 }
 
 /* =========================
@@ -177,10 +190,11 @@
 ========================= */
 .itemsGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px;
   width: 100%;
   max-width: 1200px;
+  margin-bottom: 40px;
 }
 
 /* =========================
@@ -188,37 +202,37 @@
 ========================= */
 .itemCard {
   background: rgba(15, 23, 42, 0.95);
-  border-radius: 10px;
+  border-radius: 12px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   border: 1px solid rgba(255, 255, 255, 0.05);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.35),
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4),
     inset 0 1px 0 rgba(255, 255, 255, 0.03);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .itemCard:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.45);
+  transform: translateY(-4px);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.5);
 }
 
 .itemImage {
   width: 100%;
-  height: 140px;
+  height: 160px;
   object-fit: cover;
 }
 
 .itemInfo {
-  padding: 14px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
   flex: 1;
 }
 
 .itemInfo h3 {
-  font-size: 0.95rem;
+  font-size: 1rem;
   font-weight: 600;
   margin: 0;
 }
@@ -231,26 +245,26 @@
 }
 
 .itemPrice {
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   font-weight: 700;
 }
 
 .addBtn {
   margin-top: auto;
-  padding: 8px;
+  padding: 10px;
   border: none;
   border-radius: 8px;
   font-weight: 600;
   background: linear-gradient(135deg, #ff4d6d, #ff9f1c);
   color: #fff;
   cursor: pointer;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   transition: transform 0.12s ease, box-shadow 0.12s ease;
 }
 
 .addBtn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 5px 12px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35);
 }
 
 .addBtn:active {
@@ -260,7 +274,7 @@
 .noResults {
   grid-column: 1 / -1;
   text-align: center;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   color: #94a3b8;
 }
 
@@ -269,54 +283,24 @@
 ========================= */
 @media (max-width: 768px) {
   .userHome {
-    padding: 25px 12px;
-  }
-
-  .homeNavbar {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-
-  .navLeft {
-    width: 100%;
-    justify-content: space-between;
-  }
-
-  .searchWrapper {
-    flex: 1;
-    width: 100%;
-  }
-
-  .searchInput {
-    width: 100%;
-    font-size: 0.85rem;
-  }
-
-  .navRight {
-    width: 100%;
-    justify-content: space-between;
-    gap: 10px;
-    flex-wrap: wrap;
-  }
-
-  .navMenu {
-    gap: 10px;
-    font-size: 0.8rem;
-    flex-wrap: wrap;
-  }
-
-  .logoutBtn {
-    padding: 5px 10px;
-    font-size: 0.8rem;
+    padding: 20px 12px;
   }
 
   .homeHeader h1 {
-    font-size: 1.5rem;
+    font-size: 1.6rem;
   }
 
-  .categories {
-    gap: 8px;
+  .itemsGrid {
+    gap: 16px;
+  }
+
+  .itemImage {
+    height: 140px;
+  }
+
+  .searchInput {
+    width: 140px;
+    font-size: 0.85rem;
   }
 
   .categoryBtn {
@@ -324,12 +308,21 @@
     font-size: 0.75rem;
   }
 
-  .itemsGrid {
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: 12px;
+  .navRight {
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    margin-top: 10px;
   }
 
-  .itemImage {
-    height: 120px;
+  .navMenu {
+    gap: 12px;
+    font-size: 0.8rem;
+    flex-wrap: wrap;
+  }
+
+  .logoutBtn {
+    padding: 5px 10px;
+    font-size: 0.8rem;
   }
 }

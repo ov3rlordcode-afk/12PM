@@ -1,167 +1,159 @@
 import { useState } from "react";
-import "./App.css";
+import "./Driver.css";
 
-export default function App() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [role, setRole] = useState(""); // Customer or Driver
-  const [isSignup, setIsSignup] = useState(false);
-  const [loggedIn, setLoggedIn] = useState(false);
-  const [showConfetti, setShowConfetti] = useState(false);
+type Job = {
+  id: number;
+  customer: string;
+  item: string;
+  status: "Active" | "Completed" | "Cancelled";
+};
+type Ticket = { id: number; title: string; status: "Open" | "Closed" };
 
-  const handleLogin = () => {
-    if (email && password) setLoggedIn(true);
-    else alert("Please enter email and password");
-  };
+export default function DriverDashboard() {
+  const [jobs, setJobs] = useState<Job[]>([
+    { id: 1, customer: "Alice", item: "Pizza", status: "Active" },
+    { id: 2, customer: "Bob", item: "Burger", status: "Completed" },
+    { id: 3, customer: "Charlie", item: "Sushi", status: "Cancelled" },
+    { id: 4, customer: "Dave", item: "Pasta", status: "Active" },
+    { id: 5, customer: "Eve", item: "Coffee", status: "Completed" },
+    { id: 6, customer: "Frank", item: "Salad", status: "Active" },
+  ]);
 
-  const handleSignup = () => {
-    if (!email || !password) return alert("Please enter email and password");
-    if (!role) return alert("Please select a role");
+  const [tickets, setTickets] = useState<Ticket[]>([
+    { id: 1, title: "Payment Issue", status: "Open" },
+    { id: 2, title: "App Bug", status: "Closed" },
+  ]);
 
-    setShowConfetti(true);
-    setTimeout(() => {
-      setShowConfetti(false);
-      alert(`Signed up as ${role}! You can now login.`);
-      setIsSignup(false);
-      setEmail("");
-      setPassword("");
-      setRole("");
-    }, 3000);
-  };
+  const [activeTab, setActiveTab] = useState<"Jobs" | "Tickets">("Jobs");
+  const [jobFilter, setJobFilter] = useState<
+    "All" | "Active" | "Completed" | "Cancelled"
+  >("All");
 
-  const bgGradient =
-    role === "Customer"
-      ? "linear-gradient(135deg, #ff5f6d, #ffc371)"
-      : "linear-gradient(135deg, #4facfe, #00f2fe)";
+  const filteredJobs = jobs.filter(
+    (job) => jobFilter === "All" || job.status === jobFilter
+  );
 
-  const floatingIcons =
-    role === "Customer" ? ["🍔", "🍕", "🍣", "🥗"] : ["🚗", "🛵", "🚚", "🚕"];
+  const totalJobs = jobs.length;
+  const activeJobs = jobs.filter((j) => j.status === "Active").length;
+  const completedJobs = jobs.filter((j) => j.status === "Completed").length;
+  const cancelledJobs = jobs.filter((j) => j.status === "Cancelled").length;
+  const openTickets = tickets.filter((t) => t.status === "Open").length;
 
-  const confettiColors =
-    role === "Customer"
-      ? ["#FF6B6B", "#FFD93D", "#FF9F1C", "#FF5F6D"]
-      : ["#4facfe", "#00f2fe", "#6dd5ed", "#00c3ff"];
+  const updateJobStatus = (id: number, status: Job["status"]) =>
+    setJobs(jobs.map((j) => (j.id === id ? { ...j, status } : j)));
+  const resolveTicket = (id: number) =>
+    setTickets(
+      tickets.map((t) => (t.id === id ? { ...t, status: "Closed" } : t))
+    );
 
-  return loggedIn ? (
-    <div className="app" style={{ background: bgGradient }}>
-      {/* Particle background */}
-      <div className="particles">
-        {Array.from({ length: 20 }).map((_, i) => (
-          <span
-            key={i}
-            className="particle"
-            style={{
-              "--i": i,
-              backgroundColor: confettiColors[i % confettiColors.length],
-            }}
-          ></span>
-        ))}
-      </div>
+  return (
+    <div className="driverPageWrapper">
+      <div className="driverContainer">
+        <header className="driverHeader">
+          <h1>Driver Dashboard 🚗</h1>
+          <p>Manage your deliveries and support tickets</p>
+        </header>
 
-      <div className="dashboard">
-        <h1>
-          Welcome, {email}! {role === "Customer" ? "🍕" : "🚗"}
-        </h1>
-        <p>
-          {role === "Customer"
-            ? "Start ordering your favorite meals!"
-            : "Time to deliver orders and make people happy!"}
-        </p>
-
-        {/* Floating role icons */}
-        <div className="floatingIcons">
-          {floatingIcons.map((icon, i) => (
-            <span key={i} className="floatIcon">
-              {icon}
-            </span>
-          ))}
-        </div>
-
-        <button className="logoutBtn" onClick={() => setLoggedIn(false)}>
-          Logout
-        </button>
-      </div>
-    </div>
-  ) : (
-    <div className="app">
-      {/* Confetti on signup */}
-      {showConfetti && (
-        <div className="confetti">
-          {Array.from({ length: 100 }).map((_, i) => (
-            <span
-              key={i}
-              className="confettiPiece"
-              style={{
-                backgroundColor: confettiColors[i % confettiColors.length],
-                "--i": i,
-              }}
-            ></span>
-          ))}
-        </div>
-      )}
-
-      <div className="loginCard">
-        <h1 className="logo">SwiftEats</h1>
-        <p className="subtitle">
-          {isSignup ? "Create your account" : "Sign in to continue"}
-        </p>
-
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-
-        {isSignup && (
-          <div className="roleSelection">
-            <label>
-              <input
-                type="radio"
-                name="role"
-                value="Customer"
-                checked={role === "Customer"}
-                onChange={(e) => setRole(e.target.value)}
-              />
-              <span>Customer</span>
-            </label>
-            <label>
-              <input
-                type="radio"
-                name="role"
-                value="Driver"
-                checked={role === "Driver"}
-                onChange={(e) => setRole(e.target.value)}
-              />
-              <span>Driver</span>
-            </label>
+        <div className="statsGrid">
+          <div className="statCard total">
+            <h2>{totalJobs}</h2>
+            <p>Total Jobs</p>
           </div>
+          <div className="statCard active">
+            <h2>{activeJobs}</h2>
+            <p>Active</p>
+          </div>
+          <div className="statCard completed">
+            <h2>{completedJobs}</h2>
+            <p>Completed</p>
+          </div>
+          <div className="statCard cancelled">
+            <h2>{cancelledJobs}</h2>
+            <p>Cancelled</p>
+          </div>
+          <div className="statCard tickets">
+            <h2>{openTickets}</h2>
+            <p>Open Tickets</p>
+          </div>
+        </div>
+
+        <div className="driverTabs">
+          <button
+            className={activeTab === "Jobs" ? "active" : ""}
+            onClick={() => setActiveTab("Jobs")}
+          >
+            Jobs
+          </button>
+          <button
+            className={activeTab === "Tickets" ? "active" : ""}
+            onClick={() => setActiveTab("Tickets")}
+          >
+            Tickets
+          </button>
+        </div>
+
+        {activeTab === "Jobs" && (
+          <>
+            <div className="jobFilters">
+              {["All", "Active", "Completed", "Cancelled"].map((f) => (
+                <button
+                  key={f}
+                  className={jobFilter === f ? "active" : ""}
+                  onClick={() => setJobFilter(f as any)}
+                >
+                  {f}
+                </button>
+              ))}
+            </div>
+            <div className="jobsList">
+              {filteredJobs.map((job) => (
+                <div
+                  key={job.id}
+                  className={`jobCard ${job.status.toLowerCase()}`}
+                >
+                  <p>
+                    <strong>Customer:</strong> {job.customer}
+                  </p>
+                  <p>
+                    <strong>Item:</strong> {job.item}
+                  </p>
+                  <p>
+                    <strong>Status:</strong> {job.status}
+                  </p>
+                  {job.status === "Active" && (
+                    <button
+                      onClick={() => updateJobStatus(job.id, "Completed")}
+                    >
+                      Mark Completed
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          </>
         )}
 
-        <button
-          className="loginBtn"
-          onClick={isSignup ? handleSignup : handleLogin}
-        >
-          {isSignup ? "Sign Up" : "Login"}
-        </button>
-
-        <p className="signupText">
-          {isSignup ? "Already have an account?" : "Don’t have an account?"}{" "}
-          <span className="signupLink" onClick={() => setIsSignup(!isSignup)}>
-            {isSignup ? "Login" : "Sign Up"}
-          </span>
-        </p>
+        {activeTab === "Tickets" && (
+          <div className="ticketsList">
+            {tickets.map((t) => (
+              <div
+                key={t.id}
+                className={`ticketCard ${t.status.toLowerCase()}`}
+              >
+                <p>
+                  <strong>Title:</strong> {t.title}
+                </p>
+                <p>
+                  <strong>Status:</strong> {t.status}
+                </p>
+                {t.status === "Open" && (
+                  <button onClick={() => resolveTicket(t.id)}>Resolve</button>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
-
-      <div className="bgCircle circle1"></div>
-      <div className="bgCircle circle2"></div>
-      <div className="bgCircle circle3"></div>
     </div>
   );
 }

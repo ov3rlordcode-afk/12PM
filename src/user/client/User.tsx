@@ -14,7 +14,7 @@ export default function UserHome() {
   const [name, setName] = useState("John Doe");
   const [email, setEmail] = useState("johndoe@example.com");
   const [address, setAddress] = useState("123 Main St, New York");
-  const [city, setCity] = useState("New York");
+  const [city, setCity] = useState("");
   const [editing, setEditing] = useState(false);
 
   const cities = ["New York", "Los Angeles", "Chicago", "Houston", "Miami"];
@@ -58,7 +58,7 @@ export default function UserHome() {
   ];
 
   const handleSave = () => {
-    if (!name || !email || !address || !city) {
+    if (!name || !email || !city || (city && !address)) {
       alert("Please fill all fields");
       return;
     }
@@ -81,6 +81,7 @@ export default function UserHome() {
         {/* ---------- PROFILE SIDEBAR ---------- */}
         <div className="profileCard" style={{ flex: "0 0 300px" }}>
           <h2 className="logo">Client Profile</h2>
+
           {!editing ? (
             <div className="profileDetails">
               <p>
@@ -90,11 +91,13 @@ export default function UserHome() {
                 <strong>Email:</strong> {email}
               </p>
               <p>
-                <strong>Address:</strong> {address}
-              </p>
-              <p>
                 <strong>City:</strong> {city}
               </p>
+              {city && (
+                <p>
+                  <strong>Address:</strong> {address}
+                </p>
+              )}
 
               <button className="loginBtn" onClick={() => setEditing(true)}>
                 Edit Profile
@@ -120,12 +123,6 @@ export default function UserHome() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
-              <input
-                type="text"
-                placeholder="Address"
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-              />
               <select value={city} onChange={(e) => setCity(e.target.value)}>
                 <option value="">Select a city</option>
                 {cities.map((c, i) => (
@@ -134,6 +131,17 @@ export default function UserHome() {
                   </option>
                 ))}
               </select>
+
+              {/* Show address only after city is selected */}
+              {city && (
+                <input
+                  type="text"
+                  placeholder="Address"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                />
+              )}
+
               <button className="loginBtn" onClick={handleSave}>
                 Save
               </button>
