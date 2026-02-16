@@ -6,9 +6,11 @@ type Item = {
   name: string;
   price: number;
   image: string;
-  shop: string; // unique shop name/location
-  brand: string; // e.g., Asda, Tesco
-  type: string; // category
+  shop: string;
+  brand: string;
+  type: string;
+  shopImage: string;
+  openHours: Record<string, { open: string; close: string }>;
 };
 
 type Props = {
@@ -16,7 +18,6 @@ type Props = {
   city: string;
 };
 
-// ====================== MOCK ITEMS ======================
 const mockItems: Item[] = [
   {
     id: 1,
@@ -26,6 +27,17 @@ const mockItems: Item[] = [
     shop: "Asda - High Street",
     brand: "Asda",
     type: "Grocery",
+    shopImage:
+      "https://static.where-e.com/United_Kingdom/Asda-Straiton-Superstore_0c7dbd6b34741eaee989aa4992a9f6d5.jpg",
+    openHours: {
+      Mon: { open: "08:00", close: "20:00" },
+      Tue: { open: "08:00", close: "20:00" },
+      Wed: { open: "08:00", close: "20:00" },
+      Thu: { open: "08:00", close: "20:00" },
+      Fri: { open: "08:00", close: "21:00" },
+      Sat: { open: "08:00", close: "21:00" },
+      Sun: { open: "10:00", close: "18:00" },
+    },
   },
   {
     id: 2,
@@ -35,6 +47,17 @@ const mockItems: Item[] = [
     shop: "Asda - Main Square",
     brand: "Asda",
     type: "Grocery",
+    shopImage:
+      "https://static.where-e.com/United_Kingdom/Asda-Straiton-Superstore_0c7dbd6b34741eaee989aa4992a9f6d5.jpg",
+    openHours: {
+      Mon: { open: "08:00", close: "20:00" },
+      Tue: { open: "08:00", close: "20:00" },
+      Wed: { open: "08:00", close: "20:00" },
+      Thu: { open: "08:00", close: "20:00" },
+      Fri: { open: "08:00", close: "21:00" },
+      Sat: { open: "08:00", close: "21:00" },
+      Sun: { open: "10:00", close: "18:00" },
+    },
   },
   {
     id: 3,
@@ -44,40 +67,21 @@ const mockItems: Item[] = [
     shop: "Tesco - Downtown",
     brand: "Tesco",
     type: "Grocery",
-  },
-  {
-    id: 4,
-    name: "Cheese",
-    price: 2.8,
-    image: "/images/cheese.jpg",
-    shop: "Tesco - Uptown",
-    brand: "Tesco",
-    type: "Grocery",
-  },
-  {
-    id: 5,
-    name: "USB-C Cable",
-    price: 5.5,
-    image: "/images/usb.jpg",
-    shop: "Cash Converter - City Center",
-    brand: "Cash Converter",
-    type: "PC Supplies",
-  },
-  {
-    id: 6,
-    name: "Laptop Stand",
-    price: 20.0,
-    image: "/images/stand.jpg",
-    shop: "Cash Converter - Mall",
-    brand: "Cash Converter",
-    type: "PC Supplies",
+    shopImage: "/images/tesco.jpg",
+    openHours: {
+      Mon: { open: "07:00", close: "22:00" },
+      Tue: { open: "07:00", close: "22:00" },
+      Wed: { open: "07:00", close: "22:00" },
+      Thu: { open: "07:00", close: "22:00" },
+      Fri: { open: "07:00", close: "22:00" },
+      Sat: { open: "07:00", close: "22:00" },
+      Sun: { open: "08:00", close: "20:00" },
+    },
   },
 ];
 
-// ====================== CATEGORIES ======================
 const categories = ["All", "Grocery", "PC Supplies", "Drinks", "Desserts"];
 
-// ====================== CATEGORY BUTTON ======================
 function CategoryButton({
   category,
   isActive,
@@ -97,7 +101,6 @@ function CategoryButton({
   );
 }
 
-// ====================== SHOP CARD ======================
 function BrandCard({
   brandName,
   items,
@@ -122,16 +125,52 @@ function BrandCard({
 
 function LocationCard({
   shopName,
+  shopImage,
+  openHours,
   onSelectShop,
 }: {
   shopName: string;
+  shopImage: string;
+  openHours: Record<string, { open: string; close: string }>;
   onSelectShop: () => void;
 }) {
+  const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const now = new Date();
+  const day = days[now.getDay()];
+  const currentTime = `${now.getHours().toString().padStart(2, "0")}:${now
+    .getMinutes()
+    .toString()
+    .padStart(2, "0")}`;
+  const todayHours = openHours[day];
+  const isOpen =
+    currentTime >= todayHours.open && currentTime <= todayHours.close;
+
   return (
     <div className="itemCard">
+      <img src={shopImage} alt={shopName} className="shopImage" />
       <div className="itemInfo">
         <h3>{shopName}</h3>
-        <button className="addBtn" onClick={onSelectShop}>
+        <p>
+          Today: {todayHours.open} - {todayHours.close}{" "}
+          <span style={{ color: isOpen ? "green" : "red", fontWeight: "bold" }}>
+            ({isOpen ? "Open" : "Closed"})
+          </span>
+        </p>
+        <div className="weeklyHours">
+          {Object.entries(openHours).map(([dayName, hours]) => (
+            <p
+              key={dayName}
+              style={{ fontWeight: dayName === day ? "bold" : "normal" }}
+            >
+              {dayName}: {hours.open} - {hours.close}
+            </p>
+          ))}
+        </div>
+        <button
+          className="addBtn"
+          style={{ marginTop: "10px" }}
+          onClick={onSelectShop}
+        >
           Open Menu
         </button>
       </div>
@@ -139,7 +178,6 @@ function LocationCard({
   );
 }
 
-// ====================== ITEM CARD ======================
 function ItemCard({ item }: { item: Item }) {
   const [added, setAdded] = useState(false);
   return (
@@ -163,7 +201,6 @@ function ItemCard({ item }: { item: Item }) {
   );
 }
 
-// ====================== USER HOME ======================
 export default function UserHome({ name, city }: Props) {
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
@@ -171,7 +208,6 @@ export default function UserHome({ name, city }: Props) {
   const [viewShop, setViewShop] = useState<string | null>(null);
   const [shopCategory, setShopCategory] = useState("All");
 
-  // Filter items by search and category
   const filteredItems = mockItems.filter((item) => {
     const matchesSearch =
       item.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -182,7 +218,6 @@ export default function UserHome({ name, city }: Props) {
     return matchesSearch && matchesCategory;
   });
 
-  // Group items by brand
   const itemsByBrand = filteredItems.reduce(
     (acc: Record<string, Item[]>, item) => {
       if (!acc[item.brand]) acc[item.brand] = [];
@@ -192,7 +227,9 @@ export default function UserHome({ name, city }: Props) {
     {}
   );
 
-  // Items in selected shop
+  const brandShops = selectedBrand
+    ? filteredItems.filter((item) => item.brand === selectedBrand)
+    : [];
   const shopItems = viewShop
     ? filteredItems.filter(
         (item) =>
@@ -201,14 +238,8 @@ export default function UserHome({ name, city }: Props) {
       )
     : [];
 
-  // Shops for selected brand
-  const brandShops = selectedBrand
-    ? filteredItems.filter((item) => item.brand === selectedBrand)
-    : [];
-
   return (
     <div className="userHome">
-      {/* NAVBAR */}
       <nav className="homeNavbar">
         <div className="navLeft">
           <h2 className="logo">SwiftEats</h2>
@@ -235,9 +266,7 @@ export default function UserHome({ name, city }: Props) {
         <p>Browse shops and items in {city} 🛒💻</p>
       </header>
 
-      {/* MAIN FLOW */}
       {!selectedBrand && !viewShop ? (
-        // Show all brands
         <div className="itemsGrid">
           {Object.entries(itemsByBrand).map(([brandName, items]) => (
             <BrandCard
@@ -249,7 +278,6 @@ export default function UserHome({ name, city }: Props) {
           ))}
         </div>
       ) : selectedBrand && !viewShop ? (
-        // Show all shops for selected brand
         <>
           <h2 style={{ margin: "20px 0" }}>{selectedBrand} Locations</h2>
           <div className="itemsGrid">
@@ -257,6 +285,8 @@ export default function UserHome({ name, city }: Props) {
               <LocationCard
                 key={item.shop}
                 shopName={item.shop}
+                shopImage={item.shopImage}
+                openHours={item.openHours}
                 onSelectShop={() => {
                   setViewShop(item.shop);
                   setShopCategory("All");
@@ -269,7 +299,6 @@ export default function UserHome({ name, city }: Props) {
           </button>
         </>
       ) : viewShop ? (
-        // Show menu for selected shop
         <>
           <h2 style={{ margin: "20px 0" }}>{viewShop} Menu</h2>
           <div className="categories">
