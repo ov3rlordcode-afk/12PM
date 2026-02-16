@@ -7,6 +7,7 @@ type Item = {
   price: number;
   image: string;
   shop: string;
+  type: string; // category/type
 };
 
 type Props = {
@@ -16,50 +17,98 @@ type Props = {
 
 // ====================== MOCK ITEMS ======================
 const mockItems: Item[] = [
-  // Grocery
-  { id: 7, name: "Milk", price: 1.2, image: "/images/milk.jpg", shop: "Asda" },
-  { id: 8, name: "Eggs", price: 2.5, image: "/images/eggs.jpg", shop: "Asda" },
   {
-    id: 9,
+    id: 1,
+    name: "Milk",
+    price: 1.2,
+    image: "/images/milk.jpg",
+    shop: "Asda",
+    type: "Grocery",
+  },
+  {
+    id: 2,
+    name: "Eggs",
+    price: 2.5,
+    image: "/images/eggs.jpg",
+    shop: "Asda",
+    type: "Grocery",
+  },
+  {
+    id: 3,
     name: "Bread",
     price: 1.0,
     image: "/images/bread.jpg",
     shop: "Tesco",
+    type: "Grocery",
   },
   {
-    id: 10,
+    id: 4,
     name: "Cheese",
     price: 2.8,
     image: "/images/cheese.jpg",
     shop: "Tesco",
+    type: "Grocery",
   },
-
-  // PC Supplies
   {
-    id: 11,
+    id: 5,
     name: "USB-C Cable",
     price: 5.5,
     image: "/images/usb.jpg",
     shop: "Cash Converter",
+    type: "PC Supplies",
   },
   {
-    id: 12,
+    id: 6,
     name: "Laptop Stand",
     price: 20.0,
     image: "/images/stand.jpg",
     shop: "Cash Converter",
+    type: "PC Supplies",
   },
   {
-    id: 13,
+    id: 7,
     name: "Mouse",
     price: 12.0,
     image: "/images/mouse.jpg",
     shop: "Cash Converter",
+    type: "PC Supplies",
+  },
+  {
+    id: 8,
+    name: "Coca Cola",
+    price: 1.5,
+    image: "/images/coke.jpg",
+    shop: "Tesco",
+    type: "Drinks",
+  },
+  {
+    id: 9,
+    name: "Orange Juice",
+    price: 2.2,
+    image: "/images/juice.jpg",
+    shop: "Asda",
+    type: "Drinks",
+  },
+  {
+    id: 10,
+    name: "Chocolate Cake",
+    price: 4.0,
+    image: "/images/cake.jpg",
+    shop: "Sweet Tooth",
+    type: "Desserts",
+  },
+  {
+    id: 11,
+    name: "Cupcake",
+    price: 2.0,
+    image: "/images/cupcake.jpg",
+    shop: "Sweet Tooth",
+    type: "Desserts",
   },
 ];
 
 // ====================== CATEGORIES ======================
-const categories = ["All", "Grocery", "PC Supplies"];
+const categories = ["All", "Grocery", "PC Supplies", "Drinks", "Desserts"];
 
 // ====================== CATEGORY BUTTON ======================
 function CategoryButton({
@@ -141,24 +190,20 @@ function ItemCard({ item }: { item: Item }) {
   );
 }
 
-// ====================== USER HOME COMPONENT ======================
+// ====================== USER HOME ======================
 export default function UserHome({ name, city }: Props) {
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
   const [viewShop, setViewShop] = useState<string | null>(null);
+  const [shopCategory, setShopCategory] = useState("All"); // new per-shop category
 
-  // Filter items by category and search
+  // Filter items by search and main category
   const filteredItems = mockItems.filter((item) => {
     const matchesSearch =
       item.name.toLowerCase().includes(search.toLowerCase()) ||
       item.shop.toLowerCase().includes(search.toLowerCase());
-
     const matchesCategory =
-      activeCategory === "All" ||
-      (activeCategory === "Grocery" && ["Asda", "Tesco"].includes(item.shop)) ||
-      (activeCategory === "PC Supplies" &&
-        ["Cash Converter"].includes(item.shop));
-
+      activeCategory === "All" || item.type === activeCategory;
     return matchesSearch && matchesCategory;
   });
 
@@ -171,6 +216,13 @@ export default function UserHome({ name, city }: Props) {
     },
     {}
   );
+
+  // Items in selected shop, filtered by shopCategory
+  const shopItems = viewShop
+    ? itemsByShop[viewShop]?.filter(
+        (item) => shopCategory === "All" || item.type === shopCategory
+      )
+    : [];
 
   return (
     <div className="userHome">
@@ -202,49 +254,79 @@ export default function UserHome({ name, city }: Props) {
         <p>Browse all shops and items in {city} 🛒💻</p>
       </header>
 
-      {/* CATEGORIES */}
-      <div className="categories">
-        {categories.map((cat) => (
-          <CategoryButton
-            key={cat}
-            category={cat}
-            isActive={activeCategory === cat}
-            onClick={() =>
-              setActiveCategory(activeCategory === cat ? "All" : cat)
-            }
-          />
-        ))}
-      </div>
+      {/* MAIN CONTENT */}
+      {!viewShop ? (
+        <>
+          {/* CATEGORIES */}
+          <div className="categories">
+            {categories.map((cat) => (
+              <CategoryButton
+                key={cat}
+                category={cat}
+                isActive={activeCategory === cat}
+                onClick={() =>
+                  setActiveCategory(activeCategory === cat ? "All" : cat)
+                }
+              />
+            ))}
+          </div>
 
-      {/* SHOPS GRID */}
-      <div className="itemsGrid">
-        {viewShop ? (
-          // Show items inside the shop
-          itemsByShop[viewShop]?.map((item) => (
-            <ItemCard key={item.id} item={item} />
-          ))
-        ) : Object.keys(itemsByShop).length ? (
-          Object.entries(itemsByShop).map(([shopName, items]) => (
-            <ShopCard
-              key={shopName}
-              shopName={shopName}
-              items={items}
-              onViewShop={() => setViewShop(shopName)}
-            />
-          ))
-        ) : (
-          <p className="noResults">No items or shops found 😢</p>
-        )}
-      </div>
+          {/* SHOPS GRID */}
+          <div className="itemsGrid">
+            {Object.keys(itemsByShop).length ? (
+              Object.entries(itemsByShop).map(([shopName, items]) => (
+                <ShopCard
+                  key={shopName}
+                  shopName={shopName}
+                  items={items}
+                  onViewShop={() => {
+                    setViewShop(shopName);
+                    setShopCategory("All"); // reset shop category
+                  }}
+                />
+              ))
+            ) : (
+              <p className="noResults">No items or shops found 😢</p>
+            )}
+          </div>
+        </>
+      ) : (
+        <>
+          {/* SHOP HEADER */}
+          <h2 style={{ margin: "20px 0" }}>{viewShop} Menu</h2>
 
-      {viewShop && (
-        <button
-          className="logoutBtn"
-          style={{ marginBottom: "40px" }}
-          onClick={() => setViewShop(null)}
-        >
-          Back to Shops
-        </button>
+          {/* SHOP CATEGORIES */}
+          <div className="categories">
+            {categories.map((cat) => (
+              <CategoryButton
+                key={cat}
+                category={cat}
+                isActive={shopCategory === cat}
+                onClick={() =>
+                  setShopCategory(shopCategory === cat ? "All" : cat)
+                }
+              />
+            ))}
+          </div>
+
+          {/* SHOP ITEMS */}
+          <div className="itemsGrid">
+            {shopItems.length ? (
+              shopItems.map((item) => <ItemCard key={item.id} item={item} />)
+            ) : (
+              <p className="noResults">No items in this category 😢</p>
+            )}
+          </div>
+
+          {/* BACK BUTTON */}
+          <button
+            className="backBtn"
+            style={{ marginBottom: "40px" }}
+            onClick={() => setViewShop(null)}
+          >
+            ← Back to Shops
+          </button>
+        </>
       )}
     </div>
   );
