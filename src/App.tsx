@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import "./App.css";
 import UserHome from "./home/UserHome"; // Customer homepage
 import DriverDashboard from "./user/drivers/Driver"; // Driver dashboard
@@ -25,6 +25,29 @@ export default function App() {
     "Bathgate",
     "Linlithgow",
   ];
+
+  // ---------- Restore from localStorage ----------
+  useEffect(() => {
+    const storedUser = localStorage.getItem("userData");
+    if (storedUser) {
+      const user = JSON.parse(storedUser);
+      setEmail(user.email);
+      setRole(user.role);
+      setCity(user.city || "");
+      setAddress(user.address || "");
+      setLoggedIn(true);
+    }
+  }, []);
+
+  // ---------- Save to localStorage on login ----------
+  useEffect(() => {
+    if (loggedIn) {
+      localStorage.setItem(
+        "userData",
+        JSON.stringify({ email, role, city, address })
+      );
+    }
+  }, [loggedIn, email, role, city, address]);
 
   // ---------- HANDLERS ----------
   const handleStep1 = () => {
@@ -70,6 +93,7 @@ export default function App() {
     setCanCheckAgree(false);
     setLoggedIn(false);
     setStep(1);
+    localStorage.removeItem("userData"); // clear persistent login
   };
 
   // ---------- LOGGED-IN VIEWS ----------

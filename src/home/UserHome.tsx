@@ -7,6 +7,7 @@ type Item = {
   price: number;
   image: string;
   shop: string;
+  category: string;
 };
 
 type Props = {
@@ -14,90 +15,96 @@ type Props = {
   city: string;
 };
 
+// Mock items
 const mockItems: Item[] = [
+  // Groceries
   {
     id: 1,
+    name: "Milk",
+    price: 1.5,
+    image: "/images/milk.jpg",
+    shop: "Asda",
+    category: "Groceries",
+  },
+  {
+    id: 2,
+    name: "Bread",
+    price: 1.0,
+    image: "/images/bread.jpg",
+    shop: "Asda",
+    category: "Groceries",
+  },
+  {
+    id: 3,
+    name: "Eggs",
+    price: 2.2,
+    image: "/images/eggs.jpg",
+    shop: "Tesco",
+    category: "Groceries",
+  },
+  {
+    id: 4,
+    name: "Orange Juice",
+    price: 2.5,
+    image: "/images/juice.jpg",
+    shop: "Tesco",
+    category: "Groceries",
+  },
+
+  // PC Supplies
+  {
+    id: 5,
+    name: "Gaming Mouse",
+    price: 35.0,
+    image: "/images/mouse.jpg",
+    shop: "Cash Converter",
+    category: "PC Supplies",
+  },
+  {
+    id: 6,
+    name: "Keyboard",
+    price: 50.0,
+    image: "/images/keyboard.jpg",
+    shop: "Cash Converter",
+    category: "PC Supplies",
+  },
+  {
+    id: 7,
+    name: "Monitor",
+    price: 150.0,
+    image: "/images/monitor.jpg",
+    shop: "Cash Converter",
+    category: "PC Supplies",
+  },
+
+  // Food / Restaurants
+  {
+    id: 8,
     name: "Margherita Pizza",
     price: 8.5,
     image: "/images/pizza.jpg",
     shop: "Pizza Hub",
+    category: "Food",
   },
   {
-    id: 2,
+    id: 9,
     name: "Veggie Burger",
     price: 6.2,
     image: "/images/burger.jpg",
     shop: "Burger King",
+    category: "Food",
   },
   {
-    id: 3,
+    id: 10,
     name: "Sushi Platter",
     price: 12.0,
     image: "/images/sushi.jpg",
     shop: "Sushi House",
-  },
-  {
-    id: 4,
-    name: "Pasta Carbonara",
-    price: 9.5,
-    image: "/images/pasta.jpg",
-    shop: "Italiano",
-  },
-  {
-    id: 5,
-    name: "Cappuccino",
-    price: 3.5,
-    image: "/images/coffee.jpg",
-    shop: "Coffee Corner",
-  },
-  {
-    id: 6,
-    name: "Chicken Tikka",
-    price: 10.5,
-    image: "/images/tikka.jpg",
-    shop: "Spice Route",
-  },
-  {
-    id: 7,
-    name: "Chocolate Cake",
-    price: 4.0,
-    image: "/images/cake.jpg",
-    shop: "Sweet Tooth",
-  },
-  {
-    id: 8,
-    name: "Caesar Salad",
-    price: 7.5,
-    image: "/images/salad.jpg",
-    shop: "Green Bowl",
-  },
-  {
-    id: 9,
-    name: "Fish & Chips",
-    price: 9.0,
-    image: "/images/fish.jpg",
-    shop: "Ocean's Catch",
-  },
-  {
-    id: 10,
-    name: "Latte",
-    price: 3.8,
-    image: "/images/latte.jpg",
-    shop: "Coffee Corner",
+    category: "Food",
   },
 ];
 
-const categories = [
-  "Pizza",
-  "Burgers",
-  "Sushi",
-  "Pasta",
-  "Drinks",
-  "Desserts",
-  "Salads",
-  "Indian",
-  "Seafood",
-];
+const categories = ["All", "Groceries", "PC Supplies", "Food"];
 
 function CategoryButton({
   category,
@@ -119,6 +126,8 @@ function CategoryButton({
 }
 
 function ItemCard({ item }: { item: Item }) {
+  const [added, setAdded] = useState(false);
+
   return (
     <div className="itemCard">
       <img src={item.image} alt={item.name} className="itemImage" />
@@ -126,7 +135,39 @@ function ItemCard({ item }: { item: Item }) {
         <h3>{item.name}</h3>
         <p className="shopName">{item.shop}</p>
         <p className="itemPrice">£{item.price.toFixed(2)}</p>
-        <button className="addBtn">Add to Cart</button>
+        <button
+          className={`addBtn ${added ? "added" : ""}`}
+          onClick={() => {
+            setAdded(true);
+            setTimeout(() => setAdded(false), 1000);
+          }}
+        >
+          {added ? "Added!" : "Add to Cart"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function ShopCard({
+  shopName,
+  items,
+  onViewShop,
+}: {
+  shopName: string;
+  items: Item[];
+  onViewShop: () => void;
+}) {
+  const firstItem = items[0];
+  return (
+    <div className="itemCard">
+      <img src={firstItem.image} alt={shopName} className="itemImage" />
+      <div className="itemInfo">
+        <h3>{shopName}</h3>
+        <p className="shopItems">{items.length} items available</p>
+        <button className="addBtn" onClick={onViewShop}>
+          View Shop
+        </button>
       </div>
     </div>
   );
@@ -134,22 +175,30 @@ function ItemCard({ item }: { item: Item }) {
 
 export default function UserHome({ name, city }: Props) {
   const [search, setSearch] = useState("");
-  const [activeCategory, setActiveCategory] = useState("");
+  const [activeCategory, setActiveCategory] = useState("All");
+  const [viewingShop, setViewingShop] = useState<string | null>(null);
 
+  // Filter items by search + category
   const filteredItems = mockItems.filter((item) => {
-    // Search matches item name OR shop name
     const matchesSearch =
       item.name.toLowerCase().includes(search.toLowerCase()) ||
       item.shop.toLowerCase().includes(search.toLowerCase());
-
-    // Category filter
     const matchesCategory =
-      !activeCategory ||
-      item.name.toLowerCase().includes(activeCategory.toLowerCase()) ||
-      item.shop.toLowerCase().includes(activeCategory.toLowerCase());
-
+      activeCategory === "All" || item.category === activeCategory;
     return matchesSearch && matchesCategory;
   });
+
+  // Group items by shop
+  const shopsMap: Record<string, Item[]> = {};
+  filteredItems.forEach((item) => {
+    if (!shopsMap[item.shop]) shopsMap[item.shop] = [];
+    shopsMap[item.shop].push(item);
+  });
+
+  const shopList = Object.entries(shopsMap);
+
+  // Items to display if viewing a shop
+  const currentShopItems = viewingShop ? shopsMap[viewingShop] : [];
 
   return (
     <div className="userHome">
@@ -157,33 +206,28 @@ export default function UserHome({ name, city }: Props) {
       <nav className="homeNavbar">
         <div className="navLeft">
           <h2 className="logo">SwiftEats</h2>
-          <div className="searchWrapper">
-            <input
-              type="text"
-              placeholder="Search for items or shops..."
-              className="searchInput"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
+          <input
+            type="text"
+            placeholder="Search shops or items..."
+            className="searchInput"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
         </div>
-
         <div className="navRight">
           <ul className="navMenu">
-            <li>Feature Shops</li>
+            <li>Featured</li>
             <li>About</li>
             <li>Support</li>
-            <li>Privacy</li>
-            <li>Terms</li>
           </ul>
           <button className="logoutBtn">Logout</button>
         </div>
       </nav>
 
-      {/* Welcome Banner */}
+      {/* Welcome */}
       <header className="homeHeader">
         <h1>Hello, {name}!</h1>
-        <p>Discover delicious meals in {city} 🍔🍕🍣</p>
+        <p>Discover shops and products in {city} 🛒💻🍔</p>
       </header>
 
       {/* Categories */}
@@ -193,19 +237,42 @@ export default function UserHome({ name, city }: Props) {
             key={cat}
             category={cat}
             isActive={activeCategory === cat}
-            onClick={() => setActiveCategory(activeCategory === cat ? "" : cat)}
+            onClick={() =>
+              setActiveCategory(activeCategory === cat ? "All" : cat)
+            }
           />
         ))}
       </div>
 
-      {/* Items Grid */}
-      <div className="itemsGrid">
-        {filteredItems.length ? (
-          filteredItems.map((item) => <ItemCard key={item.id} item={item} />)
-        ) : (
-          <p className="noResults">No items or shops match your search 😢</p>
-        )}
-      </div>
+      {/* Shops view */}
+      {!viewingShop ? (
+        <div className="itemsGrid">
+          {shopList.length ? (
+            shopList.map(([shopName, items]) => (
+              <ShopCard
+                key={shopName}
+                shopName={shopName}
+                items={items}
+                onViewShop={() => setViewingShop(shopName)}
+              />
+            ))
+          ) : (
+            <p className="noResults">No shops found 😢</p>
+          )}
+        </div>
+      ) : (
+        <div>
+          <button className="logoutBtn" onClick={() => setViewingShop(null)}>
+            ← Back to Shops
+          </button>
+          <h2 style={{ margin: "20px 0" }}>{viewingShop}</h2>
+          <div className="itemsGrid">
+            {currentShopItems.map((item) => (
+              <ItemCard key={item.id} item={item} />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
