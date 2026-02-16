@@ -16,7 +16,7 @@
 }
 
 /* =========================
-   NAVBAR (STICKY)
+   NAVBAR
 ========================= */
 .homeNavbar {
   position: sticky;
@@ -29,12 +29,11 @@
   align-items: center;
   margin-bottom: 40px;
   flex-wrap: wrap;
-  background: rgba(10, 15, 27, 0.95); /* slightly opaque for sticky effect */
+  background: rgba(10, 15, 27, 0.95);
   padding: 10px 20px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-/* Left: logo + search input */
 .navLeft {
   display: flex;
   align-items: center;
@@ -48,12 +47,6 @@
   background: linear-gradient(90deg, #ff4d6d, #ff9f1c);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-}
-
-.searchWrapper {
-  display: flex;
-  align-items: center;
-  flex: 1;
 }
 
 .searchInput {
@@ -76,7 +69,6 @@
   box-shadow: 0 0 0 2px rgba(255, 77, 109, 0.2);
 }
 
-/* Right: menu + logout */
 .navRight {
   display: flex;
   align-items: center;
@@ -85,7 +77,6 @@
   justify-content: flex-end;
 }
 
-/* Menu items */
 .navMenu {
   display: flex;
   align-items: center;
@@ -107,7 +98,6 @@
   color: #ff4d6d;
 }
 
-/* Logout button */
 .logoutBtn {
   padding: 6px 12px;
   border-radius: 6px;
@@ -174,11 +164,7 @@
   cursor: pointer;
 }
 
-.categoryBtn:hover {
-  background: #ff4d6d;
-  color: #fff;
-}
-
+.categoryBtn:hover,
 .categoryBtn.active {
   background: #ff4d6d;
   color: #fff;
@@ -198,7 +184,7 @@
 }
 
 /* =========================
-   ITEM CARD
+   ITEM / SHOP CARD
 ========================= */
 .itemCard {
   background: rgba(15, 23, 42, 0.95);
@@ -244,6 +230,11 @@
   letter-spacing: 0.5px;
 }
 
+.shopItems {
+  font-size: 0.8rem;
+  color: #cbd5e1;
+}
+
 .itemPrice {
   font-size: 0.95rem;
   font-weight: 700;
@@ -271,6 +262,31 @@
   transform: scale(0.97);
 }
 
+/* =========================
+   SHOP PREVIEW IMAGES
+========================= */
+.shopPreviewImages {
+  display: flex;
+  overflow: hidden;
+  gap: 2px;
+  height: 100px;
+}
+
+.shopPreviewImage {
+  flex: 1;
+  object-fit: cover;
+  border-radius: 4px;
+  height: 100%;
+  transition: transform 0.15s ease;
+}
+
+.shopPreviewImage:hover {
+  transform: scale(1.05);
+}
+
+/* =========================
+   NO RESULTS
+========================= */
 .noResults {
   grid-column: 1 / -1;
   text-align: center;

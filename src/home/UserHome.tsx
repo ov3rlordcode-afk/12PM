@@ -7,7 +7,6 @@ type Item = {
   price: number;
   image: string;
   shop: string;
-  category: string;
 };
 
 type Props = {
@@ -15,97 +14,54 @@ type Props = {
   city: string;
 };
 
-// Mock items
+// ====================== MOCK ITEMS ======================
 const mockItems: Item[] = [
-  // Groceries
+  // Grocery
+  { id: 7, name: "Milk", price: 1.2, image: "/images/milk.jpg", shop: "Asda" },
+  { id: 8, name: "Eggs", price: 2.5, image: "/images/eggs.jpg", shop: "Asda" },
   {
-    id: 1,
-    name: "Milk",
-    price: 1.5,
-    image: "/images/milk.jpg",
-    shop: "Asda",
-    category: "Groceries",
-  },
-  {
-    id: 2,
+    id: 9,
     name: "Bread",
     price: 1.0,
     image: "/images/bread.jpg",
-    shop: "Asda",
-    category: "Groceries",
+    shop: "Tesco",
   },
   {
-    id: 3,
-    name: "Eggs",
-    price: 2.2,
-    image: "/images/eggs.jpg",
+    id: 10,
+    name: "Cheese",
+    price: 2.8,
+    image: "/images/cheese.jpg",
     shop: "Tesco",
-    category: "Groceries",
-  },
-  {
-    id: 4,
-    name: "Orange Juice",
-    price: 2.5,
-    image: "/images/juice.jpg",
-    shop: "Tesco",
-    category: "Groceries",
   },
 
   // PC Supplies
   {
-    id: 5,
-    name: "Gaming Mouse",
-    price: 35.0,
+    id: 11,
+    name: "USB-C Cable",
+    price: 5.5,
+    image: "/images/usb.jpg",
+    shop: "Cash Converter",
+  },
+  {
+    id: 12,
+    name: "Laptop Stand",
+    price: 20.0,
+    image: "/images/stand.jpg",
+    shop: "Cash Converter",
+  },
+  {
+    id: 13,
+    name: "Mouse",
+    price: 12.0,
     image: "/images/mouse.jpg",
     shop: "Cash Converter",
-    category: "PC Supplies",
-  },
-  {
-    id: 6,
-    name: "Keyboard",
-    price: 50.0,
-    image: "/images/keyboard.jpg",
-    shop: "Cash Converter",
-    category: "PC Supplies",
-  },
-  {
-    id: 7,
-    name: "Monitor",
-    price: 150.0,
-    image: "/images/monitor.jpg",
-    shop: "Cash Converter",
-    category: "PC Supplies",
-  },
-
-  // Food / Restaurants
-  {
-    id: 8,
-    name: "Margherita Pizza",
-    price: 8.5,
-    image: "/images/pizza.jpg",
-    shop: "Pizza Hub",
-    category: "Food",
-  },
-  {
-    id: 9,
-    name: "Veggie Burger",
-    price: 6.2,
-    image: "/images/burger.jpg",
-    shop: "Burger King",
-    category: "Food",
-  },
-  {
-    id: 10,
-    name: "Sushi Platter",
-    price: 12.0,
-    image: "/images/sushi.jpg",
-    shop: "Sushi House",
-    category: "Food",
   },
 ];
 
-const categories = ["All", "Groceries", "PC Supplies", "Food"];
+// ====================== CATEGORIES ======================
+const categories = ["All", "Grocery", "PC Supplies"];
 
+// ====================== CATEGORY BUTTON ======================
 function CategoryButton({
   category,
   isActive,
@@ -125,6 +81,42 @@ function CategoryButton({
   );
 }
 
+// ====================== SHOP CARD ======================
+function ShopCard({
+  shopName,
+  items,
+  onViewShop,
+}: {
+  shopName: string;
+  items: Item[];
+  onViewShop: () => void;
+}) {
+  const previewItems = items.slice(0, 3);
+
+  return (
+    <div className="itemCard">
+      <div className="shopPreviewImages">
+        {previewItems.map((item) => (
+          <img
+            key={item.id}
+            src={item.image}
+            alt={item.name}
+            className="shopPreviewImage"
+          />
+        ))}
+      </div>
+      <div className="itemInfo">
+        <h3>{shopName}</h3>
+        <p className="shopItems">{items.length} items available</p>
+        <button className="addBtn" onClick={onViewShop}>
+          View Shop
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ====================== ITEM CARD ======================
 function ItemCard({ item }: { item: Item }) {
   const [added, setAdded] = useState(false);
 
@@ -149,66 +141,46 @@ function ItemCard({ item }: { item: Item }) {
   );
 }
 
-function ShopCard({
-  shopName,
-  items,
-  onViewShop,
-}: {
-  shopName: string;
-  items: Item[];
-  onViewShop: () => void;
-}) {
-  const firstItem = items[0];
-  return (
-    <div className="itemCard">
-      <img src={firstItem.image} alt={shopName} className="itemImage" />
-      <div className="itemInfo">
-        <h3>{shopName}</h3>
-        <p className="shopItems">{items.length} items available</p>
-        <button className="addBtn" onClick={onViewShop}>
-          View Shop
-        </button>
-      </div>
-    </div>
-  );
-}
-
+// ====================== USER HOME COMPONENT ======================
 export default function UserHome({ name, city }: Props) {
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
-  const [viewingShop, setViewingShop] = useState<string | null>(null);
+  const [viewShop, setViewShop] = useState<string | null>(null);
 
-  // Filter items by search + category
+  // Filter items by category and search
   const filteredItems = mockItems.filter((item) => {
     const matchesSearch =
       item.name.toLowerCase().includes(search.toLowerCase()) ||
       item.shop.toLowerCase().includes(search.toLowerCase());
+
     const matchesCategory =
-      activeCategory === "All" || item.category === activeCategory;
+      activeCategory === "All" ||
+      (activeCategory === "Grocery" && ["Asda", "Tesco"].includes(item.shop)) ||
+      (activeCategory === "PC Supplies" &&
+        ["Cash Converter"].includes(item.shop));
+
     return matchesSearch && matchesCategory;
   });
 
   // Group items by shop
-  const shopsMap: Record<string, Item[]> = {};
-  filteredItems.forEach((item) => {
-    if (!shopsMap[item.shop]) shopsMap[item.shop] = [];
-    shopsMap[item.shop].push(item);
-  });
-
-  const shopList = Object.entries(shopsMap);
-
-  // Items to display if viewing a shop
-  const currentShopItems = viewingShop ? shopsMap[viewingShop] : [];
+  const itemsByShop = filteredItems.reduce(
+    (acc: Record<string, Item[]>, item) => {
+      if (!acc[item.shop]) acc[item.shop] = [];
+      acc[item.shop].push(item);
+      return acc;
+    },
+    {}
+  );
 
   return (
     <div className="userHome">
-      {/* Navbar */}
+      {/* NAVBAR */}
       <nav className="homeNavbar">
         <div className="navLeft">
           <h2 className="logo">SwiftEats</h2>
           <input
             type="text"
-            placeholder="Search shops or items..."
+            placeholder="Search items or shops..."
             className="searchInput"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -224,13 +196,13 @@ export default function UserHome({ name, city }: Props) {
         </div>
       </nav>
 
-      {/* Welcome */}
+      {/* HEADER */}
       <header className="homeHeader">
         <h1>Hello, {name}!</h1>
-        <p>Discover shops and products in {city} 🛒💻🍔</p>
+        <p>Browse all shops and items in {city} 🛒💻</p>
       </header>
 
-      {/* Categories */}
+      {/* CATEGORIES */}
       <div className="categories">
         {categories.map((cat) => (
           <CategoryButton
@@ -244,34 +216,35 @@ export default function UserHome({ name, city }: Props) {
         ))}
       </div>
 
-      {/* Shops view */}
-      {!viewingShop ? (
-        <div className="itemsGrid">
-          {shopList.length ? (
-            shopList.map(([shopName, items]) => (
-              <ShopCard
-                key={shopName}
-                shopName={shopName}
-                items={items}
-                onViewShop={() => setViewingShop(shopName)}
-              />
-            ))
-          ) : (
-            <p className="noResults">No shops found 😢</p>
-          )}
-        </div>
-      ) : (
-        <div>
-          <button className="logoutBtn" onClick={() => setViewingShop(null)}>
-            ← Back to Shops
-          </button>
-          <h2 style={{ margin: "20px 0" }}>{viewingShop}</h2>
-          <div className="itemsGrid">
-            {currentShopItems.map((item) => (
-              <ItemCard key={item.id} item={item} />
-            ))}
-          </div>
-        </div>
+      {/* SHOPS GRID */}
+      <div className="itemsGrid">
+        {viewShop ? (
+          // Show items inside the shop
+          itemsByShop[viewShop]?.map((item) => (
+            <ItemCard key={item.id} item={item} />
+          ))
+        ) : Object.keys(itemsByShop).length ? (
+          Object.entries(itemsByShop).map(([shopName, items]) => (
+            <ShopCard
+              key={shopName}
+              shopName={shopName}
+              items={items}
+              onViewShop={() => setViewShop(shopName)}
+            />
+          ))
+        ) : (
+          <p className="noResults">No items or shops found 😢</p>
+        )}
+      </div>
+
+      {viewShop && (
+        <button
+          className="logoutBtn"
+          style={{ marginBottom: "40px" }}
+          onClick={() => setViewShop(null)}
+        >
+          Back to Shops
+        </button>
       )}
     </div>
   );
