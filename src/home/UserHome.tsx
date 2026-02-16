@@ -106,6 +106,12 @@ function LocationCard({
   const isOpen =
     currentTime >= todayHours.open && currentTime <= todayHours.close;
 
+  const openInMaps = () => {
+    const query = encodeURIComponent(`${shopName}`);
+    const url = `https://www.google.com/maps/search/?api=1&query=${query}`;
+    window.open(url, "_blank");
+  };
+
   return (
     <div className="itemCard">
       <img src={shopImage} alt={shopName} className="shopImage" />
@@ -134,13 +140,31 @@ function LocationCard({
         >
           Open Menu
         </button>
+        <button
+          className="addBtn"
+          style={{
+            marginTop: "5px",
+            backgroundColor: "#4285F4",
+            color: "white",
+          }}
+          onClick={openInMaps}
+        >
+          View on Map
+        </button>
       </div>
     </div>
   );
 }
 
-function ItemCard({ item }: { item: Item }) {
+function ItemCard({
+  item,
+  onAddToCart,
+}: {
+  item: Item;
+  onAddToCart: (item: Item) => void;
+}) {
   const [added, setAdded] = useState(false);
+
   return (
     <div className="itemCard">
       <img src={item.image} alt={item.name} className="itemImage" />
@@ -151,6 +175,7 @@ function ItemCard({ item }: { item: Item }) {
         <button
           className={`addBtn ${added ? "added" : ""}`}
           onClick={() => {
+            onAddToCart(item);
             setAdded(true);
             setTimeout(() => setAdded(false), 1000);
           }}
@@ -168,6 +193,15 @@ export default function UserHome({ name, city }: Props) {
   const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
   const [viewShop, setViewShop] = useState<string | null>(null);
   const [shopCategory, setShopCategory] = useState("All");
+  const [cart, setCart] = useState<Item[]>([]);
+
+  const addToCart = (item: Item) => {
+    setCart((prev) => [...prev, item]);
+  };
+
+  const removeFromCart = (index: number) => {
+    setCart((prev) => prev.filter((_, i) => i !== index));
+  };
 
   const filteredItems = mockItems.filter((item) => {
     const matchesSearch =
@@ -199,10 +233,19 @@ export default function UserHome({ name, city }: Props) {
       )
     : [];
 
+  const searchResults = mockItems.filter(
+    (item) =>
+      item.name.toLowerCase().includes(search.toLowerCase()) ||
+      item.shop.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const totalPrice = cart.reduce((sum, item) => sum + item.price, 0);
+
   return (
     <div className="userHome">
+      {/* Navbar */}
       <nav className="homeNavbar">
-        <div className="navLeft">
+        <div className="navLeft" style={{ position: "relative" }}>
           <h2 className="logo">SwiftEats</h2>
           <input
             type="text"
@@ -211,6 +254,23 @@ export default function UserHome({ name, city }: Props) {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
+          {search && (
+            <div className="searchDropdown">
+              {searchResults.length ? (
+                searchResults.map((result) => (
+                  <div
+                    key={result.id}
+                    className="searchResult"
+                    onClick={() => setViewShop(result.shop)}
+                  >
+                    {result.shop} - {result.name}
+                  </div>
+                ))
+              ) : (
+                <div className="searchResult">No results found</div>
+              )}
+            </div>
+          )}
         </div>
         <div className="navRight">
           <ul className="navMenu">
@@ -222,11 +282,13 @@ export default function UserHome({ name, city }: Props) {
         </div>
       </nav>
 
+      {/* Header */}
       <header className="homeHeader">
         <h1>Hello, {name}!</h1>
         <p>Browse shops and items in {city} 🛒💻</p>
       </header>
 
+      {/* Brands / Shops / Menu */}
       {!selectedBrand && !viewShop ? (
         <div className="itemsGrid">
           {Object.entries(itemsByBrand).map(([brandName, items]) => (
@@ -276,7 +338,9 @@ export default function UserHome({ name, city }: Props) {
           </div>
           <div className="itemsGrid">
             {shopItems.length ? (
-              shopItems.map((item) => <ItemCard key={item.id} item={item} />)
+              shopItems.map((item) => (
+                <ItemCard key={item.id} item={item} onAddToCart={addToCart} />
+              ))
             ) : (
               <p className="noResults">No items in this category 😢</p>
             )}
@@ -290,6 +354,54 @@ export default function UserHome({ name, city }: Props) {
           </button>
         </>
       ) : null}
+
+      {/* Floating Cart */}
+      {cart.length > 0 && (
+        <div
+          className="cartButton"
+          style={{
+            position: "fixed",
+            bottom: "20px",
+            right: "20px",
+            backgroundColor: "#FF5722",
+            color: "white",
+            padding: "15px 25px",
+            borderRadius: "30px",
+            boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
+            cursor: "pointer",
+            zIndex: 1000,
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            🛒 {cart.length} items | £{totalPrice.toFixed(2)}
+          </div>
+          <div
+            style={{ marginTop: "10px", maxHeight: "200px", overflowY: "auto" }}
+          >
+            {cart.map((item, index) => (
+              <div
+                key={index}
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  backgroundColor: "#FF8A50",
+                  padding: "5px 10px",
+                  borderRadius: "10px",
+                  marginTop: "5px",
+                }}
+              >
+                <span>{item.name}</span>
+                <span
+                  style={{ cursor: "pointer" }}
+                  onClick={() => removeFromCart(index)}
+                >
+                  ❌
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
