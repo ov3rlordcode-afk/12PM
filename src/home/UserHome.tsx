@@ -6,8 +6,9 @@ type Item = {
   name: string;
   price: number;
   image: string;
-  shop: string;
-  type: string; // category/type
+  shop: string; // unique shop name/location
+  brand: string; // e.g., Asda, Tesco
+  type: string; // category
 };
 
 type Props = {
@@ -22,7 +23,8 @@ const mockItems: Item[] = [
     name: "Milk",
     price: 1.2,
     image: "/images/milk.jpg",
-    shop: "Asda",
+    shop: "Asda - High Street",
+    brand: "Asda",
     type: "Grocery",
   },
   {
@@ -30,7 +32,8 @@ const mockItems: Item[] = [
     name: "Eggs",
     price: 2.5,
     image: "/images/eggs.jpg",
-    shop: "Asda",
+    shop: "Asda - Main Square",
+    brand: "Asda",
     type: "Grocery",
   },
   {
@@ -38,7 +41,8 @@ const mockItems: Item[] = [
     name: "Bread",
     price: 1.0,
     image: "/images/bread.jpg",
-    shop: "Tesco",
+    shop: "Tesco - Downtown",
+    brand: "Tesco",
     type: "Grocery",
   },
   {
@@ -46,7 +50,8 @@ const mockItems: Item[] = [
     name: "Cheese",
     price: 2.8,
     image: "/images/cheese.jpg",
-    shop: "Tesco",
+    shop: "Tesco - Uptown",
+    brand: "Tesco",
     type: "Grocery",
   },
   {
@@ -54,7 +59,8 @@ const mockItems: Item[] = [
     name: "USB-C Cable",
     price: 5.5,
     image: "/images/usb.jpg",
-    shop: "Cash Converter",
+    shop: "Cash Converter - City Center",
+    brand: "Cash Converter",
     type: "PC Supplies",
   },
   {
@@ -62,48 +68,9 @@ const mockItems: Item[] = [
     name: "Laptop Stand",
     price: 20.0,
     image: "/images/stand.jpg",
-    shop: "Cash Converter",
+    shop: "Cash Converter - Mall",
+    brand: "Cash Converter",
     type: "PC Supplies",
-  },
-  {
-    id: 7,
-    name: "Mouse",
-    price: 12.0,
-    image: "/images/mouse.jpg",
-    shop: "Cash Converter",
-    type: "PC Supplies",
-  },
-  {
-    id: 8,
-    name: "Coca Cola",
-    price: 1.5,
-    image: "/images/coke.jpg",
-    shop: "Tesco",
-    type: "Drinks",
-  },
-  {
-    id: 9,
-    name: "Orange Juice",
-    price: 2.2,
-    image: "/images/juice.jpg",
-    shop: "Asda",
-    type: "Drinks",
-  },
-  {
-    id: 10,
-    name: "Chocolate Cake",
-    price: 4.0,
-    image: "/images/cake.jpg",
-    shop: "Sweet Tooth",
-    type: "Desserts",
-  },
-  {
-    id: 11,
-    name: "Cupcake",
-    price: 2.0,
-    image: "/images/cupcake.jpg",
-    shop: "Sweet Tooth",
-    type: "Desserts",
   },
 ];
 
@@ -131,34 +98,41 @@ function CategoryButton({
 }
 
 // ====================== SHOP CARD ======================
-function ShopCard({
-  shopName,
+function BrandCard({
+  brandName,
   items,
-  onViewShop,
+  onViewBrand,
 }: {
-  shopName: string;
+  brandName: string;
   items: Item[];
-  onViewShop: () => void;
+  onViewBrand: () => void;
 }) {
-  const previewItems = items.slice(0, 3);
-
   return (
     <div className="itemCard">
-      <div className="shopPreviewImages">
-        {previewItems.map((item) => (
-          <img
-            key={item.id}
-            src={item.image}
-            alt={item.name}
-            className="shopPreviewImage"
-          />
-        ))}
+      <div className="itemInfo">
+        <h3>{brandName}</h3>
+        <p>{items.length} locations</p>
+        <button className="addBtn" onClick={onViewBrand}>
+          View Shops
+        </button>
       </div>
+    </div>
+  );
+}
+
+function LocationCard({
+  shopName,
+  onSelectShop,
+}: {
+  shopName: string;
+  onSelectShop: () => void;
+}) {
+  return (
+    <div className="itemCard">
       <div className="itemInfo">
         <h3>{shopName}</h3>
-        <p className="shopItems">{items.length} items available</p>
-        <button className="addBtn" onClick={onViewShop}>
-          View Shop
+        <button className="addBtn" onClick={onSelectShop}>
+          Open Menu
         </button>
       </div>
     </div>
@@ -168,7 +142,6 @@ function ShopCard({
 // ====================== ITEM CARD ======================
 function ItemCard({ item }: { item: Item }) {
   const [added, setAdded] = useState(false);
-
   return (
     <div className="itemCard">
       <img src={item.image} alt={item.name} className="itemImage" />
@@ -194,34 +167,43 @@ function ItemCard({ item }: { item: Item }) {
 export default function UserHome({ name, city }: Props) {
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
+  const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
   const [viewShop, setViewShop] = useState<string | null>(null);
-  const [shopCategory, setShopCategory] = useState("All"); // new per-shop category
+  const [shopCategory, setShopCategory] = useState("All");
 
-  // Filter items by search and main category
+  // Filter items by search and category
   const filteredItems = mockItems.filter((item) => {
     const matchesSearch =
       item.name.toLowerCase().includes(search.toLowerCase()) ||
-      item.shop.toLowerCase().includes(search.toLowerCase());
+      item.shop.toLowerCase().includes(search.toLowerCase()) ||
+      item.brand.toLowerCase().includes(search.toLowerCase());
     const matchesCategory =
       activeCategory === "All" || item.type === activeCategory;
     return matchesSearch && matchesCategory;
   });
 
-  // Group items by shop
-  const itemsByShop = filteredItems.reduce(
+  // Group items by brand
+  const itemsByBrand = filteredItems.reduce(
     (acc: Record<string, Item[]>, item) => {
-      if (!acc[item.shop]) acc[item.shop] = [];
-      acc[item.shop].push(item);
+      if (!acc[item.brand]) acc[item.brand] = [];
+      acc[item.brand].push(item);
       return acc;
     },
     {}
   );
 
-  // Items in selected shop, filtered by shopCategory
+  // Items in selected shop
   const shopItems = viewShop
-    ? itemsByShop[viewShop]?.filter(
-        (item) => shopCategory === "All" || item.type === shopCategory
+    ? filteredItems.filter(
+        (item) =>
+          item.shop === viewShop &&
+          (shopCategory === "All" || item.type === shopCategory)
       )
+    : [];
+
+  // Shops for selected brand
+  const brandShops = selectedBrand
+    ? filteredItems.filter((item) => item.brand === selectedBrand)
     : [];
 
   return (
@@ -248,54 +230,48 @@ export default function UserHome({ name, city }: Props) {
         </div>
       </nav>
 
-      {/* HEADER */}
       <header className="homeHeader">
         <h1>Hello, {name}!</h1>
-        <p>Browse all shops and items in {city} 🛒💻</p>
+        <p>Browse shops and items in {city} 🛒💻</p>
       </header>
 
-      {/* MAIN CONTENT */}
-      {!viewShop ? (
+      {/* MAIN FLOW */}
+      {!selectedBrand && !viewShop ? (
+        // Show all brands
+        <div className="itemsGrid">
+          {Object.entries(itemsByBrand).map(([brandName, items]) => (
+            <BrandCard
+              key={brandName}
+              brandName={brandName}
+              items={items}
+              onViewBrand={() => setSelectedBrand(brandName)}
+            />
+          ))}
+        </div>
+      ) : selectedBrand && !viewShop ? (
+        // Show all shops for selected brand
         <>
-          {/* CATEGORIES */}
-          <div className="categories">
-            {categories.map((cat) => (
-              <CategoryButton
-                key={cat}
-                category={cat}
-                isActive={activeCategory === cat}
-                onClick={() =>
-                  setActiveCategory(activeCategory === cat ? "All" : cat)
-                }
+          <h2 style={{ margin: "20px 0" }}>{selectedBrand} Locations</h2>
+          <div className="itemsGrid">
+            {brandShops.map((item) => (
+              <LocationCard
+                key={item.shop}
+                shopName={item.shop}
+                onSelectShop={() => {
+                  setViewShop(item.shop);
+                  setShopCategory("All");
+                }}
               />
             ))}
           </div>
-
-          {/* SHOPS GRID */}
-          <div className="itemsGrid">
-            {Object.keys(itemsByShop).length ? (
-              Object.entries(itemsByShop).map(([shopName, items]) => (
-                <ShopCard
-                  key={shopName}
-                  shopName={shopName}
-                  items={items}
-                  onViewShop={() => {
-                    setViewShop(shopName);
-                    setShopCategory("All"); // reset shop category
-                  }}
-                />
-              ))
-            ) : (
-              <p className="noResults">No items or shops found 😢</p>
-            )}
-          </div>
+          <button className="backBtn" onClick={() => setSelectedBrand(null)}>
+            ← Back to Brands
+          </button>
         </>
-      ) : (
+      ) : viewShop ? (
+        // Show menu for selected shop
         <>
-          {/* SHOP HEADER */}
           <h2 style={{ margin: "20px 0" }}>{viewShop} Menu</h2>
-
-          {/* SHOP CATEGORIES */}
           <div className="categories">
             {categories.map((cat) => (
               <CategoryButton
@@ -308,8 +284,6 @@ export default function UserHome({ name, city }: Props) {
               />
             ))}
           </div>
-
-          {/* SHOP ITEMS */}
           <div className="itemsGrid">
             {shopItems.length ? (
               shopItems.map((item) => <ItemCard key={item.id} item={item} />)
@@ -317,17 +291,15 @@ export default function UserHome({ name, city }: Props) {
               <p className="noResults">No items in this category 😢</p>
             )}
           </div>
-
-          {/* BACK BUTTON */}
           <button
             className="backBtn"
-            style={{ marginBottom: "40px" }}
             onClick={() => setViewShop(null)}
+            style={{ marginBottom: "40px" }}
           >
             ← Back to Shops
           </button>
         </>
-      )}
+      ) : null}
     </div>
   );
 }
