@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import "./UserHome.css";
 
 type Item = {
@@ -191,8 +191,44 @@ function ItemCard({
   );
 }
 
-// --- UserHome ---
-export default function UserHome({ name, city }: Props) {
+// --- Avatar Dropdown ---
+function AvatarDropdown({ onLogout }: { onLogout: () => void }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (ref.current && !ref.current.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  return (
+    <div className="avatarWrapper" ref={ref}>
+      <img
+        src="/images/avatar.png"
+        alt="Profile"
+        className="avatar"
+        onClick={() => setOpen(!open)}
+      />
+      {open && (
+        <div className="avatarDropdown">
+          <div className="dropdownItem">Profile</div>
+          <div className="dropdownItem">Settings</div>
+          <div className="dropdownItem" onClick={onLogout}>
+            Logout
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// --- UserHome Component ---
+export default function UserHome({ name, city, onLogout }: Props) {
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
   const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
@@ -248,32 +284,30 @@ export default function UserHome({ name, city }: Props) {
       <nav className="homeNavbar improvedNavbar">
         <div className="navLeft">
           <h2 className="logo">Swift2Me</h2>
-          <div className="searchWrapper">
-            <input
-              type="text"
-              placeholder="Search items or shops..."
-              className="searchInput"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-            {search && (
-              <div className="searchDropdown">
-                {searchResults.length ? (
-                  searchResults.map((result) => (
-                    <div
-                      key={result.id}
-                      className="searchResult"
-                      onClick={() => setViewShop(result.shop)}
-                    >
-                      <strong>{result.shop}</strong> - {result.name}
-                    </div>
-                  ))
-                ) : (
-                  <div className="searchResult">No results found</div>
-                )}
-              </div>
-            )}
-          </div>
+          <input
+            type="text"
+            placeholder="Search items or shops..."
+            className="searchInput"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          {search && (
+            <div className="searchDropdown">
+              {searchResults.length ? (
+                searchResults.map((result) => (
+                  <div
+                    key={result.id}
+                    className="searchResult"
+                    onClick={() => setViewShop(result.shop)}
+                  >
+                    <strong>{result.shop}</strong> - {result.name}
+                  </div>
+                ))
+              ) : (
+                <div className="searchResult">No results found</div>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="navRight">
@@ -282,6 +316,8 @@ export default function UserHome({ name, city }: Props) {
             <li className="navItem">About</li>
             <li className="navItem">Support</li>
           </ul>
+
+          <AvatarDropdown onLogout={onLogout} />
         </div>
       </nav>
 
