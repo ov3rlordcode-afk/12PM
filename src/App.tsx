@@ -112,10 +112,6 @@ export default function App() {
           )}
         </div>
 
-        <button className="logoutBtn" onClick={handleLogout}>
-          Logout
-        </button>
-
         {showConfetti && (
           <div className="confetti">
             {Array.from({ length: 100 }).map((_, i) => (

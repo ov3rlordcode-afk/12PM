@@ -98,49 +98,9 @@
   color: #ff4d6d;
 }
 
-.logoutBtn {
-  padding: 6px 12px;
-  border-radius: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(15, 23, 42, 0.9);
-  color: #e2e8f0;
-  font-weight: 500;
-  font-size: 0.9rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  white-space: nowrap;
-}
-
-.logoutBtn:hover {
-  border-color: #ff4d6d;
-  transform: translateY(-1px);
-}
-
 /* =========================
    HEADER
 ========================= */
-.homeHeader {
-  text-align: center;
-  margin-bottom: 40px;
-  max-width: 700px;
-}
-
-.homeHeader h1 {
-  font-size: 2rem;
-  font-weight: 700;
-  background: linear-gradient(90deg, #ff4d6d, #ff9f1c);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  margin: 0;
-}
-
-.homeHeader p {
-  font-size: 0.95rem;
-  margin-top: 10px;
-  color: #cbd5e1;
-}
 
 /* =========================
    CATEGORIES
@@ -338,7 +298,82 @@
   }
 
   .logoutBtn {
-    padding: 5px 10px;
+    padding: 50px 10px;
     font-size: 0.8rem;
   }
+}
+/* =========================
+   NAVBAR FLEX FIX + LOGOUT LEVEL
+========================= */
+.homeNavbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center; /* vertical center everything */
+  flex-wrap: nowrap;
+  padding: 10px 20px;
+  background: rgba(10, 15, 27, 0.95);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.navLeft,
+.navRight {
+  display: flex;
+  align-items: center; /* vertical alignment */
+  gap: 20px;
+}
+
+.navMenu {
+  display: flex;
+  align-items: center; /* vertical align all li items */
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.navMenu li {
+  display: flex;
+  align-items: center; /* vertical centering inside li */
+  justify-content: center; /* horizontal centering inside li */
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 8px 16px; /* SAME padding for all items */
+  border-radius: 8px;
+  color: #e2e8f0;
+  min-height: 40px; /* enforce same height */
+  line-height: 1; /* no extra height from line spacing */
+  background: rgba(15, 23, 42, 0.6);
+  box-sizing: border-box; /* include padding in height */
+  transition: all 0.2s ease;
+}
+
+/* Hover gradient for all nav items */
+.navMenu li:hover {
+  color: #fff;
+  background: linear-gradient(135deg, #ff4d6d, #ff9f1c);
+  box-shadow: 0 4px 12px rgba(255, 77, 109, 0.4);
+  transform: translateY(-2px);
+}
+
+/* Logout button matches exact size & alignment, just different gradient */
+.navMenu li.logoutBtn {
+  font-weight: 600; /* match other items */
+  padding: 8px 16px; /* same as others */
+  min-height: 40px; /* same height */
+  line-height: 1; /* same line height */
+  background: linear-gradient(135deg, #ff4d6d, #ff9f1c);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+}
+
+.navMenu li.logoutBtn:hover {
+  background: linear-gradient(135deg, #ff9f1c, #ff4d6d);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 77, 109, 0.5);
 }

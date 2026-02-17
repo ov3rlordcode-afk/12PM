@@ -44,7 +44,7 @@ const mockItems: Item[] = [
 
 const categories = ["All", "Grocery", "PC Supplies", "Drinks", "Desserts"];
 
-// -- Category Button --
+// --- Category Button ---
 function CategoryButton({
   category,
   isActive,
@@ -64,7 +64,7 @@ function CategoryButton({
   );
 }
 
-// -- Brand Card --
+// --- Brand Card ---
 function BrandCard({
   brandName,
   items,
@@ -87,7 +87,7 @@ function BrandCard({
   );
 }
 
-// -- Location Card with Open Hours Hidden by Default --
+// --- Location Card ---
 function LocationCard({
   shopName,
   shopImage,
@@ -100,7 +100,6 @@ function LocationCard({
   onSelectShop: () => void;
 }) {
   const [showHours, setShowHours] = useState(false);
-
   const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const now = new Date();
   const day = days[now.getDay()];
@@ -130,7 +129,6 @@ function LocationCard({
           </span>
         </p>
 
-        {/* Toggle Open Hours */}
         {showHours && (
           <div className="weeklyHours">
             {Object.entries(openHours).map(([dayName, hours]) => (
@@ -148,21 +146,13 @@ function LocationCard({
           className="addBtn"
           style={{ marginTop: "10px" }}
           onClick={() => {
-            setShowHours(!showHours); // toggle open hours
-            onSelectShop(); // open the shop menu
+            setShowHours(!showHours);
+            onSelectShop();
           }}
         >
-          {showHours ? "Hide Open Times" : "View Open Times"}
+          {showHours ? "Hide Open Times" : "View Shop Menu"}
         </button>
-        <button
-          className="addBtn"
-          style={{
-            marginTop: "5px",
-            backgroundColor: "#4285F4",
-            color: "white",
-          }}
-          onClick={openInMaps}
-        >
+        <button className="addBtn mapBtn" onClick={openInMaps}>
           View on Map
         </button>
       </div>
@@ -170,7 +160,7 @@ function LocationCard({
   );
 }
 
-// -- Item Card --
+// --- Item Card ---
 function ItemCard({
   item,
   onAddToCart,
@@ -179,7 +169,6 @@ function ItemCard({
   onAddToCart: (item: Item) => void;
 }) {
   const [added, setAdded] = useState(false);
-
   return (
     <div className="itemCard">
       <img src={item.image} alt={item.name} className="itemImage" />
@@ -202,8 +191,8 @@ function ItemCard({
   );
 }
 
-// -- UserHome Component --
-export default function UserHome({ name, city, onLogout }: Props) {
+// --- UserHome ---
+export default function UserHome({ name, city }: Props) {
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
   const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
@@ -255,54 +244,48 @@ export default function UserHome({ name, city, onLogout }: Props) {
 
   return (
     <div className="userHome app">
-      {/* Navbar */}
-      <nav className="homeNavbar">
-        <div className="navLeft" style={{ position: "relative" }}>
-          <h2 className="logo">SwiftEats</h2>
-          <input
-            type="text"
-            placeholder="Search items or shops..."
-            className="searchInput"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-          {search && (
-            <div className="searchDropdown">
-              {searchResults.length ? (
-                searchResults.map((result) => (
-                  <div
-                    key={result.id}
-                    className="searchResult"
-                    onClick={() => setViewShop(result.shop)}
-                  >
-                    {result.shop} - {result.name}
-                  </div>
-                ))
-              ) : (
-                <div className="searchResult">No results found</div>
-              )}
-            </div>
-          )}
+      {/* --- Header --- */}
+      <nav className="homeNavbar improvedNavbar">
+        <div className="navLeft">
+          <h2 className="logo">Swift2Me</h2>
+          <div className="searchWrapper">
+            <input
+              type="text"
+              placeholder="Search items or shops..."
+              className="searchInput"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+            {search && (
+              <div className="searchDropdown">
+                {searchResults.length ? (
+                  searchResults.map((result) => (
+                    <div
+                      key={result.id}
+                      className="searchResult"
+                      onClick={() => setViewShop(result.shop)}
+                    >
+                      <strong>{result.shop}</strong> - {result.name}
+                    </div>
+                  ))
+                ) : (
+                  <div className="searchResult">No results found</div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
+
         <div className="navRight">
           <ul className="navMenu">
-            <li>Featured</li>
-            <li>About</li>
-            <li>Support</li>
+            <li className="navItem">Featured</li>
+            <li className="navItem">About</li>
+            <li className="navItem">Support</li>
           </ul>
-          <button className="logoutBtn" onClick={onLogout}>
-            Logout
-          </button>
         </div>
       </nav>
 
-      {/* Header */}
-      <header className="homeHeader">
-        <h1>Hello, {name}!</h1>
-        <p>Browse shops and items in {city} 🛒💻</p>
-      </header>
-
-      {/* Brands / Shops / Menu */}
+      {/* --- Brands / Shops --- */}
       {!selectedBrand && !viewShop ? (
         <div className="itemsGrid">
           {Object.entries(itemsByBrand).map(([brandName, items]) => (
@@ -335,9 +318,17 @@ export default function UserHome({ name, city, onLogout }: Props) {
             ← Back to Brands
           </button>
         </>
-      ) : viewShop ? (
-        <>
-          <h2 style={{ margin: "20px 0" }}>{viewShop} Menu</h2>
+      ) : null}
+
+      {/* --- Floating Shop Menu --- */}
+      {viewShop && (
+        <div className="floatingMenu">
+          <div className="menuHeader">
+            <h3>{viewShop} Menu</h3>
+            <button className="closeMenuBtn" onClick={() => setViewShop(null)}>
+              ×
+            </button>
+          </div>
           <div className="categories">
             {categories.map((cat) => (
               <CategoryButton
@@ -359,17 +350,10 @@ export default function UserHome({ name, city, onLogout }: Props) {
               <p className="noResults">No items in this category 😢</p>
             )}
           </div>
-          <button
-            className="backBtn"
-            onClick={() => setViewShop(null)}
-            style={{ marginBottom: "40px" }}
-          >
-            ← Back to Shops
-          </button>
-        </>
-      ) : null}
+        </div>
+      )}
 
-      {/* Floating Cart */}
+      {/* --- Floating Cart --- */}
       {cart.length > 0 && (
         <div className="cartButton">
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
