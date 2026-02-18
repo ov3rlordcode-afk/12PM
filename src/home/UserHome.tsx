@@ -191,15 +191,17 @@ function ItemCard({
   );
 }
 
-// --- Avatar Dropdown ---
+// --- Avatar Dropdown with Nested Menu ---
 function AvatarDropdown({ onLogout }: { onLogout: () => void }) {
   const [open, setOpen] = useState(false);
+  const [openDeliveries, setOpenDeliveries] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (ref.current && !ref.current.contains(event.target as Node)) {
         setOpen(false);
+        setOpenDeliveries(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -216,8 +218,25 @@ function AvatarDropdown({ onLogout }: { onLogout: () => void }) {
       />
       {open && (
         <div className="avatarDropdown">
-          <div className="dropdownItem">Profile</div>
-          <div className="dropdownItem">Settings</div>
+          <div className="dropdownItem">MyAccount</div>
+
+          <div
+            className="dropdownItem nestedItem"
+            onClick={() => setOpenDeliveries(!openDeliveries)}
+          >
+            Deliveries {openDeliveries ? "▲" : "▼"}
+          </div>
+          {openDeliveries && (
+            <div className="nestedDropdown">
+              <div className="dropdownItem">Being Delivered</div>
+              <div className="dropdownItem">Waiting For Driver</div>
+              <div className="dropdownItem">Cancelled</div>
+              <div className="dropdownItem">Refunded</div>
+            </div>
+          )}
+
+          <div className="dropdownItem">Wallet</div>
+          <div className="dropdownItem">Support</div>
           <div className="dropdownItem" onClick={onLogout}>
             Logout
           </div>
