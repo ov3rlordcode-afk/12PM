@@ -1,12 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import "./App.css";
 import UserHome from "./home/UserHome";
 import DriverDashboard from "./user/drivers/Driver";
-import Drivesteps from "./steps/drivesteps";
-import UserSteps from "./steps/usersteps";
+import DriverSteps from "./steps/driverssteps"; // <-- import new component
 
 type Role = "Customer" | "Driver" | "";
-type Step = 1 | 2;
+type Step = 1 | 2 | 3 | 4;
 
 interface StoredUser {
   email: string;
@@ -16,7 +15,18 @@ interface StoredUser {
   license?: string;
   vehicleType?: string;
   vehicleInfo?: string;
+  licensePhoto?: string;
 }
+
+const SCOTLAND_CITIES = [
+  "Edinburgh",
+  "Musselburgh",
+  "Dalkeith",
+  "Bonnyrigg",
+  "Livingston",
+  "Bathgate",
+  "Linlithgow",
+] as const;
 
 export default function App() {
   const [email, setEmail] = useState("");
@@ -32,8 +42,15 @@ export default function App() {
   const [license, setLicense] = useState("");
   const [vehicleType, setVehicleType] = useState("");
   const [vehicleInfo, setVehicleInfo] = useState("");
+  const [licensePhoto, setLicensePhoto] = useState<File | null>(null);
 
+  const [agreed, setAgreed] = useState(false);
   const [loggedIn, setLoggedIn] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [isLoginMode, setIsLoginMode] = useState(false);
+
+  const termsRef = useRef<HTMLDivElement>(null);
+  const [canCheckAgree, setCanCheckAgree] = useState(false);
 
   const isCustomer = role === "Customer";
   const isDriver = role === "Driver";
@@ -42,15 +59,19 @@ export default function App() {
   useEffect(() => {
     const stored = localStorage.getItem("userData");
     if (!stored) return;
-    const user: StoredUser = JSON.parse(stored);
-    setEmail(user.email);
-    setRole(user.role);
-    setCity(user.city ?? "");
-    setAddress(user.address ?? "");
-    setLicense(user.license ?? "");
-    setVehicleType(user.vehicleType ?? "");
-    setVehicleInfo(user.vehicleInfo ?? "");
-    setLoggedIn(true);
+    try {
+      const user: StoredUser = JSON.parse(stored);
+      setEmail(user.email);
+      setRole(user.role);
+      setCity(user.city ?? "");
+      setAddress(user.address ?? "");
+      setLicense(user.license ?? "");
+      setVehicleType(user.vehicleType ?? "");
+      setVehicleInfo(user.vehicleInfo ?? "");
+      setLoggedIn(true);
+    } catch {
+      localStorage.removeItem("userData");
+    }
   }, []);
 
   /* Persist session */
@@ -64,27 +85,109 @@ export default function App() {
       license,
       vehicleType,
       vehicleInfo,
+      licensePhoto: licensePhoto ? licensePhoto.name : undefined,
     };
     localStorage.setItem("userData", JSON.stringify(user));
-  }, [loggedIn, email, role, city, address, license, vehicleType, vehicleInfo]);
+  }, [
+    loggedIn,
+    email,
+    role,
+    city,
+    address,
+    license,
+    vehicleType,
+    vehicleInfo,
+    licensePhoto,
+  ]);
 
-  const handleDriverComplete = (data: {
-    license: string;
-    vehicleType: string;
-    vehicleInfo: string;
-    licensePhoto: File | null;
-  }) => {
-    setLicense(data.license);
-    setVehicleType(data.vehicleType);
-    setVehicleInfo(data.vehicleInfo);
-    setLoggedIn(true);
+  /* Login */
+  const handleLogin = () => {
+    if (!email.trim() || !password.trim())
+      return alert("Please enter email and password");
+    const stored = localStorage.getItem("userData");
+    if (!stored) return alert("No account found. Please sign up.");
+    try {
+      const user: StoredUser = JSON.parse(stored);
+      if (user.email !== email) return alert("Account not found.");
+      setRole(user.role);
+      setCity(user.city ?? "");
+      setAddress(user.address ?? "");
+      setLicense(user.license ?? "");
+      setVehicleType(user.vehicleType ?? "");
+      setVehicleInfo(user.vehicleInfo ?? "");
+      setLoggedIn(true);
+    } catch {
+      alert("Error logging in.");
+    }
   };
 
-  const handleUserComplete = (data: { city: string; address: string }) => {
-    setCity(data.city);
-    setAddress(data.address);
-    setLoggedIn(true);
+  /* Logout */
+  const handleLogout = () => {
+    setEmail("");
+    setPassword("");
+    setRole("");
+    setCity("");
+    setAddress("");
+    setLicense("");
+    setVehicleType("");
+    setVehicleInfo("");
+    setLicensePhoto(null);
+    setAgreed(false);
+    setCanCheckAgree(false);
+    setLoggedIn(false);
+    setStep(1);
+    localStorage.removeItem("userData");
   };
+
+  /* Step Validations */
+  const validateStep1 = () => {
+    if (!email.trim() || !password.trim())
+      return alert("Enter email and password");
+    if (!role) return alert("Select a role");
+    if (isDriver && !/^(?=.*[A-Z])(?=.*\d).{8,}$/.test(password)) {
+      return alert("UK password must be 8+ chars, include uppercase & number");
+    }
+    setStep(2);
+  };
+
+  const validateStep2 = () => {
+    if (isCustomer && !city) return alert("Select your city");
+    if (isDriver && !license.trim())
+      return alert("Enter your driving license number");
+    setStep(3);
+  };
+
+  const validateStep3 = () => {
+    if (isCustomer && !address.trim()) return alert("Enter your address");
+    if (isDriver) {
+      if (!vehicleType) return alert("Select vehicle type");
+      if (!vehicleInfo.trim()) return alert("Enter vehicle info");
+      if (!licensePhoto) return alert("Upload photo of driving license");
+    }
+    setStep(4);
+  };
+
+  const completeSignup = () => {
+    if (!agreed) return alert("You must agree to the Terms of Service");
+    setShowConfetti(true);
+    setTimeout(() => {
+      setShowConfetti(false);
+      setLoggedIn(true);
+    }, 500);
+  };
+
+  const handleTermsScroll = () => {
+    const el = termsRef.current;
+    if (!el) return;
+    if (el.scrollTop + el.clientHeight >= el.scrollHeight - 5)
+      setCanCheckAgree(true);
+  };
+
+  const renderCard = (content: React.ReactNode) => (
+    <div className="app">
+      <div className="loginCard">{content}</div>
+    </div>
+  );
 
   /* Logged in view */
   if (loggedIn) {
@@ -103,73 +206,175 @@ export default function App() {
             />
           )}
         </div>
+        <button className="logoutBtn" onClick={handleLogout}>
+          Logout
+        </button>
+        {showConfetti && (
+          <div className="confetti">
+            {Array.from({ length: 100 }).map((_, i) => (
+              <span
+                key={i}
+                className="confettiPiece"
+                style={{ "--i": i } as any}
+              />
+            ))}
+          </div>
+        )}
       </div>
     );
   }
 
-  /* Step 1: Enter email, password, select role */
+  /* Step 1: Email / Password / Role */
   if (step === 1) {
-    return (
-      <div className="loginCard">
+    return renderCard(
+      <>
         <h1 className="logo">Swift2Me</h1>
-
+        <p className="subtitle">{isLoginMode ? "Login" : "Create Account"}</p>
         <input
           type="email"
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
-
         <input
           type="password"
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
-
-        <div className="roleSelection">
-          {(["Customer", "Driver"] as Role[]).map((r) => (
-            <label key={r}>
-              <input
-                type="radio"
-                name="role"
-                value={r}
-                checked={role === r}
-                onChange={(e) => setRole(e.target.value as Role)}
-              />
-              <span>{r}</span>
-            </label>
-          ))}
-        </div>
-
+        {!isLoginMode && (
+          <div className="roleSelection">
+            {(["Customer", "Driver"] as Role[]).map((r) => (
+              <label key={r}>
+                <input
+                  type="radio"
+                  name="role"
+                  value={r}
+                  checked={role === r}
+                  onChange={(e) => setRole(e.target.value as Role)}
+                />
+                <span>{r}</span>
+              </label>
+            ))}
+          </div>
+        )}
         <button
-          onClick={() => {
-            if (!email || !password) return alert("Enter email & password");
-            if (!role) return alert("Select a role");
-            setStep(2);
-          }}
+          className="loginBtn"
+          onClick={isLoginMode ? handleLogin : validateStep1}
         >
-          Next
+          {isLoginMode ? "Login" : "Next"}
         </button>
-      </div>
+      </>
     );
   }
 
-  /* Step 2: Render role-specific signup steps */
-  if (step === 2) {
-    if (isDriver) {
-      return (
-        <Drivesteps
-          email={email}
-          password={password}
-          onComplete={handleDriverComplete}
-        />
+  /* Step 2 & 3: Customers or Drivers */
+  if ((step === 2 || step === 3) && isCustomer) {
+    const cityImages: Record<string, string> = {
+      Edinburgh:
+        "https://www.wallart.com/media/catalog/product/cache/871f459736130e239a3f5e6472128962/w/0/w06138-small.jpg",
+      Musselburgh: "/images/musselburgh.jpg",
+      Dalkeith:
+        "https://www.midlothianview.com/wp-content/uploads/Dalkeith-High-Street.webp",
+      Bonnyrigg: "/images/bonnyrigg.jpg",
+      Livingston: "/images/livingston.jpg",
+      Bathgate: "/images/bathgate.jpg",
+      Linlithgow: "/images/linlithgow.jpg",
+    };
+
+    if (step === 2) {
+      return renderCard(
+        <>
+          <h1 className="logo">Choose Your City</h1>
+          <div className="cityGrid">
+            {SCOTLAND_CITIES.map((c) => (
+              <div
+                key={c}
+                className={`cityCard ${city === c ? "selected" : ""}`}
+                style={{ backgroundImage: `url(${cityImages[c]})` }}
+                onClick={() => setCity(c)}
+              >
+                <div className="cityOverlay">
+                  <span className="cityName">{c}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="btnRow">
+            <button onClick={() => setStep(1)}>Back</button>
+            <button onClick={validateStep2} disabled={!city}>
+              Next
+            </button>
+          </div>
+        </>
       );
     }
 
-    if (isCustomer) {
-      return <UserSteps onComplete={handleUserComplete} />;
+    if (step === 3) {
+      return renderCard(
+        <>
+          <h1 className="logo">Enter Your Address</h1>
+          <input
+            type="text"
+            placeholder="Address"
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+          />
+          <div className="btnRow">
+            <button onClick={() => setStep(2)}>Back</button>
+            <button onClick={validateStep3}>Next</button>
+          </div>
+        </>
+      );
     }
+  }
+
+  if ((step === 2 || step === 3) && isDriver) {
+    return renderCard(
+      <DriverSteps
+        step={step}
+        license={license}
+        vehicleType={vehicleType}
+        vehicleInfo={vehicleInfo}
+        licensePhoto={licensePhoto}
+        setStep={setStep}
+        setLicense={setLicense}
+        setVehicleType={setVehicleType}
+        setVehicleInfo={setVehicleInfo}
+        setLicensePhoto={setLicensePhoto}
+        validateStep2={validateStep2}
+        validateStep3={validateStep3}
+      />
+    );
+  }
+
+  /* Step 4: Terms */
+  if (step === 4) {
+    return renderCard(
+      <>
+        <h1 className="termsTitle">Terms of Service</h1>
+        <div className="termsBox" ref={termsRef} onScroll={handleTermsScroll}>
+          <p>Welcome to Swift2Me.</p>
+          <p>Scroll to bottom to enable agreement.</p>
+          <p style={{ marginTop: "600px" }}>End of Terms.</p>
+        </div>
+        <label className="agreeLabel">
+          <input
+            type="checkbox"
+            checked={agreed}
+            disabled={!canCheckAgree}
+            onChange={(e) => setAgreed(e.target.checked)}
+          />
+          I agree to the Terms
+        </label>
+        <div className="btnRow">
+          <button onClick={() => setStep(3)}>Back</button>
+          <button disabled={!agreed} onClick={completeSignup}>
+            Accept & Continue
+          </button>
+        </div>
+      </>
+    );
   }
 
   return null;
