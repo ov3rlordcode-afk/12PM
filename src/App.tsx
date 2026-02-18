@@ -1,126 +1,89 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import "./App.css";
 import UserHome from "./home/UserHome";
 import DriverDashboard from "./user/drivers/Driver";
+import Drivesteps from "./steps/drivesteps";
+import UserSteps from "./steps/usersteps";
 
-type Role = "Customer" | "Driver" | "Staff" | "";
-type Step = 1 | 2 | 3 | 4;
+type Role = "Customer" | "Driver" | "";
+type Step = 1 | 2;
 
 interface StoredUser {
   email: string;
   role: Role;
   city?: string;
   address?: string;
+  license?: string;
+  vehicleType?: string;
+  vehicleInfo?: string;
 }
-
-const SCOTLAND_CITIES = [
-  "Edinburgh",
-  "Musselburgh",
-  "Dalkeith",
-  "Bonnyrigg",
-  "Livingston",
-  "Bathgate",
-  "Linlithgow",
-] as const;
 
 export default function App() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState<Role>("");
   const [step, setStep] = useState<Step>(1);
+
+  // Customer fields
   const [city, setCity] = useState("");
   const [address, setAddress] = useState("");
-  const [agreed, setAgreed] = useState(false);
-  const [loggedIn, setLoggedIn] = useState(false);
-  const [showConfetti, setShowConfetti] = useState(false);
 
-  const termsRef = useRef<HTMLDivElement>(null);
-  const [canCheckAgree, setCanCheckAgree] = useState(false);
+  // Driver fields
+  const [license, setLicense] = useState("");
+  const [vehicleType, setVehicleType] = useState("");
+  const [vehicleInfo, setVehicleInfo] = useState("");
+
+  const [loggedIn, setLoggedIn] = useState(false);
 
   const isCustomer = role === "Customer";
   const isDriver = role === "Driver";
-  const isStaff = role === "Staff";
 
   /* Restore session */
   useEffect(() => {
     const stored = localStorage.getItem("userData");
     if (!stored) return;
-    try {
-      const user: StoredUser = JSON.parse(stored);
-      setEmail(user.email);
-      setRole(user.role);
-      setCity(user.city ?? "");
-      setAddress(user.address ?? "");
-      setLoggedIn(true);
-    } catch {
-      localStorage.removeItem("userData");
-    }
+    const user: StoredUser = JSON.parse(stored);
+    setEmail(user.email);
+    setRole(user.role);
+    setCity(user.city ?? "");
+    setAddress(user.address ?? "");
+    setLicense(user.license ?? "");
+    setVehicleType(user.vehicleType ?? "");
+    setVehicleInfo(user.vehicleInfo ?? "");
+    setLoggedIn(true);
   }, []);
 
   /* Persist session */
   useEffect(() => {
     if (!loggedIn) return;
-    const user: StoredUser = { email, role, city, address };
+    const user: StoredUser = {
+      email,
+      role,
+      city,
+      address,
+      license,
+      vehicleType,
+      vehicleInfo,
+    };
     localStorage.setItem("userData", JSON.stringify(user));
-  }, [loggedIn, email, role, city, address]);
+  }, [loggedIn, email, role, city, address, license, vehicleType, vehicleInfo]);
 
-  /* Logout */
-  const handleLogout = () => {
-    setEmail("");
-    setPassword("");
-    setRole("");
-    setCity("");
-    setAddress("");
-    setAgreed(false);
-    setCanCheckAgree(false);
-    setLoggedIn(false);
-    setStep(1);
-    localStorage.removeItem("userData");
+  const handleDriverComplete = (data: {
+    license: string;
+    vehicleType: string;
+    vehicleInfo: string;
+    licensePhoto: File | null;
+  }) => {
+    setLicense(data.license);
+    setVehicleType(data.vehicleType);
+    setVehicleInfo(data.vehicleInfo);
+    setLoggedIn(true);
   };
 
-  /* Validation and step progression */
-  const validateStep1 = () => {
-    if (!email.trim() || !password.trim())
-      return alert("Please enter email and password");
-    if (!role) return alert("Please select a role");
-
-    if (isDriver || isStaff) {
-      // For drivers/staff: skip steps, show dashboard immediately
-      setShowConfetti(true);
-      setTimeout(() => {
-        setShowConfetti(false);
-        setLoggedIn(true);
-      }, 500);
-    } else {
-      // For customers, go to city selection
-      setStep(2);
-    }
-  };
-
-  const validateStep2 = () => {
-    if (!city) return alert("Please select your city");
-    setStep(3);
-  };
-
-  const validateStep3 = () => {
-    if (!address.trim()) return alert("Please enter your address");
-    setStep(4);
-  };
-
-  const completeSignup = () => {
-    if (!agreed) return alert("You must agree to the Terms of Service");
-    setShowConfetti(true);
-    setTimeout(() => {
-      setShowConfetti(false);
-      setLoggedIn(true);
-    }, 500);
-  };
-
-  const handleTermsScroll = () => {
-    const el = termsRef.current;
-    if (!el) return;
-    if (el.scrollTop + el.clientHeight >= el.scrollHeight - 5)
-      setCanCheckAgree(true);
+  const handleUserComplete = (data: { city: string; address: string }) => {
+    setCity(data.city);
+    setAddress(data.address);
+    setLoggedIn(true);
   };
 
   /* Logged in view */
@@ -131,53 +94,32 @@ export default function App() {
           {isCustomer && (
             <UserHome name={email} city={city} address={address} />
           )}
-          {isDriver && <DriverDashboard />}
-          {isStaff && (
-            <div className="dashboard">
-              <h1>Welcome, {email} (Staff)</h1>
-            </div>
+          {isDriver && (
+            <DriverDashboard
+              name={email}
+              license={license}
+              vehicleType={vehicleType}
+              vehicleInfo={vehicleInfo}
+            />
           )}
         </div>
-
-        <button className="logoutBtn" onClick={handleLogout}>
-          Logout
-        </button>
-
-        {showConfetti && (
-          <div className="confetti">
-            {Array.from({ length: 100 }).map((_, i) => (
-              <span
-                key={i}
-                className="confettiPiece"
-                style={{ "--i": i } as any}
-              />
-            ))}
-          </div>
-        )}
       </div>
     );
   }
 
-  /* Login/signup steps */
-  const renderCard = (content: React.ReactNode) => (
-    <div className="app">
-      <div className="loginCard">{content}</div>
-    </div>
-  );
-
+  /* Step 1: Enter email, password, select role */
   if (step === 1) {
-    return renderCard(
-      <>
+    return (
+      <div className="loginCard">
         <h1 className="logo">Swift2Me</h1>
-        <p className="subtitle">
-          Enter your email, password, and select a role
-        </p>
+
         <input
           type="email"
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
+
         <input
           type="password"
           placeholder="Password"
@@ -186,7 +128,7 @@ export default function App() {
         />
 
         <div className="roleSelection">
-          {(["Customer", "Driver", "Staff"] as Role[]).map((r) => (
+          {(["Customer", "Driver"] as Role[]).map((r) => (
             <label key={r}>
               <input
                 type="radio"
@@ -200,83 +142,34 @@ export default function App() {
           ))}
         </div>
 
-        <button className="loginBtn" onClick={validateStep1}>
+        <button
+          onClick={() => {
+            if (!email || !password) return alert("Enter email & password");
+            if (!role) return alert("Select a role");
+            setStep(2);
+          }}
+        >
           Next
         </button>
-      </>
-    );
-  }
-
-  if (step === 2 && isCustomer) {
-    return renderCard(
-      <>
-        <h1 className="logo">Choose Your City</h1>
-        <select value={city} onChange={(e) => setCity(e.target.value)}>
-          <option value="">Select your city</option>
-          {SCOTLAND_CITIES.map((c) => (
-            <option key={c} value={c}>
-              {c}
-            </option>
-          ))}
-        </select>
-
-        <div className="btnRow">
-          <button onClick={() => setStep(1)}>Back</button>
-          <button onClick={validateStep2}>Next</button>
-        </div>
-      </>
-    );
-  }
-
-  if (step === 3 && isCustomer) {
-    return renderCard(
-      <>
-        <h1 className="logo">Enter Your Address</h1>
-        <input
-          type="text"
-          placeholder="Address"
-          value={address}
-          onChange={(e) => setAddress(e.target.value)}
-        />
-
-        <div className="btnRow">
-          <button onClick={() => setStep(2)}>Back</button>
-          <button onClick={validateStep3}>Next</button>
-        </div>
-      </>
-    );
-  }
-
-  if (step === 4 && isCustomer) {
-    return (
-      <div className="app">
-        <div className="termsCard">
-          <h1 className="termsTitle">Terms of Service</h1>
-          <div className="termsBox" ref={termsRef} onScroll={handleTermsScroll}>
-            <p>Welcome to Swift2Me.</p>
-            <p>Scroll to bottom to enable agreement.</p>
-            <p style={{ marginTop: "600px" }}>End of Terms.</p>
-          </div>
-
-          <label className="agreeLabel">
-            <input
-              type="checkbox"
-              checked={agreed}
-              disabled={!canCheckAgree}
-              onChange={(e) => setAgreed(e.target.checked)}
-            />
-            I agree to the Terms
-          </label>
-
-          <div className="btnRow">
-            <button onClick={() => setStep(3)}>Back</button>
-            <button disabled={!agreed} onClick={completeSignup}>
-              Accept & Continue
-            </button>
-          </div>
-        </div>
       </div>
     );
+  }
+
+  /* Step 2: Render role-specific signup steps */
+  if (step === 2) {
+    if (isDriver) {
+      return (
+        <Drivesteps
+          email={email}
+          password={password}
+          onComplete={handleDriverComplete}
+        />
+      );
+    }
+
+    if (isCustomer) {
+      return <UserSteps onComplete={handleUserComplete} />;
+    }
   }
 
   return null;
