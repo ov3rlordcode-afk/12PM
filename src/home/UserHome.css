@@ -422,3 +422,18 @@
   background: linear-gradient(135deg, #ff4d6d, #ff9f1c);
   color: #fff;
 }
+/* New Admin Button */
+.adminBtn {
+  background: red;
+  color: white;
+  font-weight: 600;
+  padding: 10px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.adminBtn:hover {
+  background: darkred;
+}

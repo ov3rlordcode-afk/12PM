@@ -1,227 +1,155 @@
-/* =========================
-   PAGE WRAPPER
-========================= */
-.driverPageWrapper {
-  width: 100%;
-  min-height: 100vh;
-  padding: 20px;
-  background: #0a0f1b;
-  color: #e2e8f0;
-  display: flex;
-  justify-content: center;
-  box-sizing: border-box;
+.driverDashboard {
+  max-width: 1000px;
+  margin: 40px auto;
+  padding: 30px;
+  background: #1a1a2e;
+  border-radius: 20px;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+  color: #eee;
+  font-family: "Segoe UI", sans-serif;
 }
 
-/* Container */
-.driverContainer {
-  width: 100%;
-  max-width: 1200px;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-/* =========================
-   HEADER
-========================= */
-.driverHeader {
-  text-align: center;
-}
-
-.driverHeader h1 {
-  font-size: 1.8rem;
-  margin: 0;
-  background: linear-gradient(90deg, #ff4d6d, #ff9f1c);
+header h1 {
+  font-size: 2.4rem;
+  margin-bottom: 6px;
+  background: linear-gradient(90deg, #00f0ff, #ff00f0);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
-.driverHeader p {
-  font-size: 0.9rem;
-  color: #cbd5e1;
-  margin-top: 6px;
+header p {
+  color: #bbb;
+  margin-bottom: 25px;
+  font-weight: 500;
 }
 
-/* =========================
-   STATS GRID
-========================= */
-.statsGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 16px;
-}
-
-.statCard {
-  padding: 12px;
-  border-radius: 8px;
-  background: rgba(15, 23, 42, 0.95);
-  text-align: center;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
-}
-
-.statCard h2 {
-  margin: 0;
-  font-size: 1.2rem;
-}
-
-.statCard p {
-  margin: 4px 0 0;
-  font-size: 0.8rem;
-  color: #94a3b8;
-}
-
-.statCard.total {
-  border-top: 3px solid #ff4d6d;
-}
-
-.statCard.active {
-  border-top: 3px solid #1abc9c;
-}
-
-.statCard.completed {
-  border-top: 3px solid #4caf50;
-}
-
-.statCard.cancelled {
-  border-top: 3px solid #f44336;
-}
-
-.statCard.tickets {
-  border-top: 3px solid #ff9f1c;
-}
-
-/* =========================
-   TABS
-========================= */
-.driverTabs {
+.statsPanel {
   display: flex;
-  gap: 12px;
-  justify-content: center;
-  flex-wrap: wrap;
+  justify-content: space-around;
+  margin-bottom: 15px;
+  font-weight: 600;
+  color: #ccc;
 }
 
-.driverTabs button {
-  padding: 6px 12px;
-  font-size: 0.85rem;
-  border-radius: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  background: rgba(15, 23, 42, 0.9);
-  color: #e2e8f0;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.driverTabs button.active {
-  background: #ff4d6d;
-  border-color: #ff4d6d;
-  color: #fff;
-}
-
-/* =========================
-   JOB FILTERS
-========================= */
-.jobFilters {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  justify-content: center;
-  margin-top: 12px;
-}
-
-.jobFilters button {
-  padding: 4px 10px;
-  font-size: 0.8rem;
+.progressBar {
+  height: 14px;
+  background: #33334d;
   border-radius: 12px;
-  border: 1px solid #ff4d6d;
-  background: rgba(15, 23, 42, 0.9);
-  color: #ff4d6d;
-  cursor: pointer;
-  transition: all 0.15s ease;
+  overflow: hidden;
+  margin-bottom: 25px;
 }
 
-.jobFilters button.active {
-  background: #ff4d6d;
-  color: #fff;
+.progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, #4facfe, #00f2fe);
+  transition: width 0.5s ease;
 }
 
-/* =========================
-   JOB / TICKET LIST
-========================= */
-.jobsList,
-.ticketsList {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+.filterButtons {
+  margin-bottom: 20px;
 }
 
-.jobCard,
-.ticketCard {
-  background: rgba(15, 23, 42, 0.95);
-  padding: 12px;
-  border-radius: 8px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  word-wrap: break-word;
-}
-
-.jobCard.active {
-  border-left: 4px solid #1abc9c;
-}
-
-.jobCard.completed {
-  border-left: 4px solid #4caf50;
-}
-
-.jobCard.cancelled {
-  border-left: 4px solid #f44336;
-}
-
-.ticketCard.open {
-  border-left: 4px solid #ff9f1c;
-}
-
-.ticketCard.closed {
-  border-left: 4px solid #4caf50;
-}
-
-.jobCard button,
-.ticketCard button {
-  align-self: flex-start;
-  padding: 4px 10px;
-  font-size: 0.8rem;
-  border-radius: 6px;
+.filterButtons button {
+  margin-right: 12px;
+  padding: 8px 18px;
   border: none;
-  background: #ff4d6d;
-  color: #fff;
+  border-radius: 12px;
+  background: #2a2a40;
+  color: #eee;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.12s ease;
+  transition: 0.3s;
 }
 
-.jobCard button:hover,
-.ticketCard button:hover {
-  background: #ff7777;
+.filterButtons button.active,
+.filterButtons button:hover {
+  background: linear-gradient(90deg, #4facfe, #00f2fe);
+  color: #fff;
+  box-shadow: 0 4px 15px rgba(0, 255, 254, 0.3);
 }
 
-/* =========================
-   RESPONSIVE
-========================= */
-@media (max-width: 768px) {
-  .statsGrid {
-    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-    gap: 12px;
-  }
+.deliveryList {
+  list-style: none;
+  padding: 0;
+}
 
-  .driverHeader h1 {
-    font-size: 1.4rem;
-  }
+.deliveryList li {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background: #25254b;
+  padding: 16px 22px;
+  margin-bottom: 14px;
+  border-radius: 16px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+}
 
-  .jobFilters button,
-  .driverTabs button,
-  .jobCard button,
-  .ticketCard button {
-    font-size: 0.75rem;
-    padding: 3px 8px;
-  }
+.deliveryList li.dragging {
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+  transform: scale(1.02);
+}
+
+.deliveryList li.completed .desc {
+  text-decoration: line-through;
+  color: #888;
+}
+
+.deliveryList li.pending .desc {
+  color: #fff;
+}
+
+.deliveryList .details {
+  margin-top: 6px;
+  color: #aaa;
+  font-size: 0.85rem;
+}
+
+.priority {
+  font-weight: bold;
+  padding: 2px 8px;
+  border-radius: 8px;
+  display: inline-block;
+  margin-top: 6px;
+  font-size: 0.8rem;
+}
+
+.priority.high {
+  background: #ff4b5c;
+  color: #fff;
+}
+.priority.medium {
+  background: #ffb400;
+  color: #fff;
+}
+.priority.low {
+  background: #6a67ce;
+  color: #fff;
+}
+
+.deliveryList li button {
+  align-self: flex-end;
+  margin-top: 10px;
+  background: linear-gradient(90deg, #ff6a00, #ee0979);
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 14px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.deliveryList li button:hover {
+  background: linear-gradient(90deg, #ee0979, #ff6a00);
+  box-shadow: 0 6px 25px rgba(238, 9, 121, 0.5);
+}
+
+.noDeliveries {
+  text-align: center;
+  color: #999;
+  margin-top: 25px;
+  font-style: italic;
 }

@@ -228,7 +228,7 @@ function AvatarDropdown({ onLogout }: { onLogout: () => void }) {
           </div>
           {openDeliveries && (
             <div className="nestedDropdown">
-              <div className="dropdownItem">Being Delivered</div>
+              <div className="dropdownItem">My Orders</div>
               <div className="dropdownItem">Waiting For Driver</div>
               <div className="dropdownItem">Cancelled</div>
               <div className="dropdownItem">Refunded</div>
@@ -331,7 +331,7 @@ export default function UserHome({ name, city, onLogout }: Props) {
 
         <div className="navRight">
           <ul className="navMenu">
-            <li className="navItem">Featured</li>
+            <li className="navItem">J</li>
             <li className="navItem">About</li>
             <li className="navItem">Support</li>
           </ul>

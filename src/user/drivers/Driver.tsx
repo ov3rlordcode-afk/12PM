@@ -1,159 +1,128 @@
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./Driver.css";
 
-type Job = {
+interface Delivery {
   id: number;
-  customer: string;
-  item: string;
-  status: "Active" | "Completed" | "Cancelled";
-};
-type Ticket = { id: number; title: string; status: "Open" | "Closed" };
+  description: string;
+  completed: boolean;
+  details?: string;
+}
 
-export default function DriverDashboard() {
-  const [jobs, setJobs] = useState<Job[]>([
-    { id: 1, customer: "Alice", item: "Pizza", status: "Active" },
-    { id: 2, customer: "Bob", item: "Burger", status: "Completed" },
-    { id: 3, customer: "Charlie", item: "Sushi", status: "Cancelled" },
-    { id: 4, customer: "Dave", item: "Pasta", status: "Active" },
-    { id: 5, customer: "Eve", item: "Coffee", status: "Completed" },
-    { id: 6, customer: "Frank", item: "Salad", status: "Active" },
-  ]);
+const DriverDashboard: React.FC = () => {
+  const [deliveries, setDeliveries] = useState<Delivery[]>([]);
+  const [filter, setFilter] = useState<"all" | "pending" | "completed">("all");
 
-  const [tickets, setTickets] = useState<Ticket[]>([
-    { id: 1, title: "Payment Issue", status: "Open" },
-    { id: 2, title: "App Bug", status: "Closed" },
-  ]);
+  // Load deliveries from localStorage or mock
+  useEffect(() => {
+    const stored = localStorage.getItem("driverDeliveries");
+    if (stored) {
+      setDeliveries(JSON.parse(stored));
+    } else {
+      const mock: Delivery[] = [
+        {
+          id: 1,
+          description: "Pickup from Edinburgh → Drop at Musselburgh",
+          completed: false,
+          details: "Fragile items",
+        },
+        {
+          id: 2,
+          description: "Pickup from Livingston → Drop at Bathgate",
+          completed: false,
+          details: "Deliver between 2-4pm",
+        },
+        {
+          id: 3,
+          description: "Pickup from Linlithgow → Drop at Dalkeith",
+          completed: false,
+          details: "Keep upright",
+        },
+      ];
+      setDeliveries(mock);
+    }
+  }, []);
 
-  const [activeTab, setActiveTab] = useState<"Jobs" | "Tickets">("Jobs");
-  const [jobFilter, setJobFilter] = useState<
-    "All" | "Active" | "Completed" | "Cancelled"
-  >("All");
+  // Persist deliveries
+  useEffect(() => {
+    localStorage.setItem("driverDeliveries", JSON.stringify(deliveries));
+  }, [deliveries]);
 
-  const filteredJobs = jobs.filter(
-    (job) => jobFilter === "All" || job.status === jobFilter
-  );
-
-  const totalJobs = jobs.length;
-  const activeJobs = jobs.filter((j) => j.status === "Active").length;
-  const completedJobs = jobs.filter((j) => j.status === "Completed").length;
-  const cancelledJobs = jobs.filter((j) => j.status === "Cancelled").length;
-  const openTickets = tickets.filter((t) => t.status === "Open").length;
-
-  const updateJobStatus = (id: number, status: Job["status"]) =>
-    setJobs(jobs.map((j) => (j.id === id ? { ...j, status } : j)));
-  const resolveTicket = (id: number) =>
-    setTickets(
-      tickets.map((t) => (t.id === id ? { ...t, status: "Closed" } : t))
+  const toggleComplete = (id: number) => {
+    setDeliveries((prev) =>
+      prev.map((d) => (d.id === id ? { ...d, completed: !d.completed } : d))
     );
+  };
+
+  const total = deliveries.length;
+  const completedCount = deliveries.filter((d) => d.completed).length;
+  const pendingCount = total - completedCount;
+  const progress = total === 0 ? 0 : (completedCount / total) * 100;
+
+  const filteredDeliveries = deliveries.filter((d) => {
+    if (filter === "all") return true;
+    if (filter === "pending") return !d.completed;
+    return d.completed;
+  });
 
   return (
-    <div className="driverPageWrapper">
-      <div className="driverContainer">
-        <header className="driverHeader">
-          <h1>Driver Dashboard 🚗</h1>
-          <p>Manage your deliveries and support tickets</p>
-        </header>
+    <div className="driverDashboard">
+      <header>
+        <h1>🚚 Driver Portal</h1>
+        <p>Manage your deliveries efficiently</p>
+      </header>
 
-        <div className="statsGrid">
-          <div className="statCard total">
-            <h2>{totalJobs}</h2>
-            <p>Total Jobs</p>
-          </div>
-          <div className="statCard active">
-            <h2>{activeJobs}</h2>
-            <p>Active</p>
-          </div>
-          <div className="statCard completed">
-            <h2>{completedJobs}</h2>
-            <p>Completed</p>
-          </div>
-          <div className="statCard cancelled">
-            <h2>{cancelledJobs}</h2>
-            <p>Cancelled</p>
-          </div>
-          <div className="statCard tickets">
-            <h2>{openTickets}</h2>
-            <p>Open Tickets</p>
-          </div>
-        </div>
-
-        <div className="driverTabs">
-          <button
-            className={activeTab === "Jobs" ? "active" : ""}
-            onClick={() => setActiveTab("Jobs")}
-          >
-            Jobs
-          </button>
-          <button
-            className={activeTab === "Tickets" ? "active" : ""}
-            onClick={() => setActiveTab("Tickets")}
-          >
-            Tickets
-          </button>
-        </div>
-
-        {activeTab === "Jobs" && (
-          <>
-            <div className="jobFilters">
-              {["All", "Active", "Completed", "Cancelled"].map((f) => (
-                <button
-                  key={f}
-                  className={jobFilter === f ? "active" : ""}
-                  onClick={() => setJobFilter(f as any)}
-                >
-                  {f}
-                </button>
-              ))}
-            </div>
-            <div className="jobsList">
-              {filteredJobs.map((job) => (
-                <div
-                  key={job.id}
-                  className={`jobCard ${job.status.toLowerCase()}`}
-                >
-                  <p>
-                    <strong>Customer:</strong> {job.customer}
-                  </p>
-                  <p>
-                    <strong>Item:</strong> {job.item}
-                  </p>
-                  <p>
-                    <strong>Status:</strong> {job.status}
-                  </p>
-                  {job.status === "Active" && (
-                    <button
-                      onClick={() => updateJobStatus(job.id, "Completed")}
-                    >
-                      Mark Completed
-                    </button>
-                  )}
-                </div>
-              ))}
-            </div>
-          </>
-        )}
-
-        {activeTab === "Tickets" && (
-          <div className="ticketsList">
-            {tickets.map((t) => (
-              <div
-                key={t.id}
-                className={`ticketCard ${t.status.toLowerCase()}`}
-              >
-                <p>
-                  <strong>Title:</strong> {t.title}
-                </p>
-                <p>
-                  <strong>Status:</strong> {t.status}
-                </p>
-                {t.status === "Open" && (
-                  <button onClick={() => resolveTicket(t.id)}>Resolve</button>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
+      {/* Stats panel */}
+      <div className="statsPanel">
+        <div>Total: {total}</div>
+        <div>Pending: {pendingCount}</div>
+        <div>Completed: {completedCount}</div>
       </div>
+
+      {/* Progress bar */}
+      <div className="progressBar">
+        <div className="progressFill" style={{ width: `${progress}%` }} />
+      </div>
+
+      {/* Filters */}
+      <div className="filterButtons">
+        <button
+          className={filter === "all" ? "active" : ""}
+          onClick={() => setFilter("all")}
+        >
+          All
+        </button>
+        <button
+          className={filter === "pending" ? "active" : ""}
+          onClick={() => setFilter("pending")}
+        >
+          Pending
+        </button>
+        <button
+          className={filter === "completed" ? "active" : ""}
+          onClick={() => setFilter("completed")}
+        >
+          Completed
+        </button>
+      </div>
+
+      {/* Delivery list */}
+      {filteredDeliveries.length > 0 ? (
+        <ul className="deliveryList">
+          {filteredDeliveries.map((d) => (
+            <li key={d.id} className={d.completed ? "completed" : "pending"}>
+              <div className="desc">{d.description}</div>
+              {d.details && <div className="details">{d.details}</div>}
+              <button onClick={() => toggleComplete(d.id)}>
+                {d.completed ? "Mark Pending" : "Mark Completed"}
+              </button>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="noDeliveries">No deliveries found for this filter.</p>
+      )}
     </div>
   );
-}
+};
+
+export default DriverDashboard;

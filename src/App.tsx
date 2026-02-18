@@ -1,88 +1,70 @@
 import { useState, useRef, useEffect } from "react";
 import "./App.css";
-import UserHome from "./home/UserHome"; // Customer homepage
-import DriverDashboard from "./user/drivers/Driver"; // Driver dashboard
+import UserHome from "./home/UserHome";
+import DriverDashboard from "./user/drivers/Driver";
+
+type Role = "Customer" | "Driver" | "Staff" | "";
+type Step = 1 | 2 | 3 | 4;
+
+interface StoredUser {
+  email: string;
+  role: Role;
+  city?: string;
+  address?: string;
+}
+
+const SCOTLAND_CITIES = [
+  "Edinburgh",
+  "Musselburgh",
+  "Dalkeith",
+  "Bonnyrigg",
+  "Livingston",
+  "Bathgate",
+  "Linlithgow",
+] as const;
 
 export default function App() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("");
-  const [step, setStep] = useState<1 | 2 | 3 | 4 | 5>(1);
+  const [role, setRole] = useState<Role>("");
+  const [step, setStep] = useState<Step>(1);
   const [city, setCity] = useState("");
   const [address, setAddress] = useState("");
   const [agreed, setAgreed] = useState(false);
   const [loggedIn, setLoggedIn] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
+
   const termsRef = useRef<HTMLDivElement>(null);
   const [canCheckAgree, setCanCheckAgree] = useState(false);
 
-  const scotlandCities = [
-    "Edinburgh",
-    "Musselburgh",
-    "Dalkeith",
-    "Bonnyrigg",
-    "Livingston",
-    "Bathgate",
-    "Linlithgow",
-  ];
+  const isCustomer = role === "Customer";
+  const isDriver = role === "Driver";
+  const isStaff = role === "Staff";
 
-  // ---------- Restore from localStorage ----------
+  /* Restore session */
   useEffect(() => {
-    const storedUser = localStorage.getItem("userData");
-    if (storedUser) {
-      const user = JSON.parse(storedUser);
+    const stored = localStorage.getItem("userData");
+    if (!stored) return;
+    try {
+      const user: StoredUser = JSON.parse(stored);
       setEmail(user.email);
       setRole(user.role);
-      setCity(user.city || "");
-      setAddress(user.address || "");
+      setCity(user.city ?? "");
+      setAddress(user.address ?? "");
       setLoggedIn(true);
+    } catch {
+      localStorage.removeItem("userData");
     }
   }, []);
 
-  // ---------- Save to localStorage on login ----------
+  /* Persist session */
   useEffect(() => {
-    if (loggedIn) {
-      localStorage.setItem(
-        "userData",
-        JSON.stringify({ email, role, city, address })
-      );
-    }
+    if (!loggedIn) return;
+    const user: StoredUser = { email, role, city, address };
+    localStorage.setItem("userData", JSON.stringify(user));
   }, [loggedIn, email, role, city, address]);
 
-  // ---------- HANDLERS ----------
-  const handleStep1 = () => {
-    if (!email || !password) return alert("Please enter email and password");
-    if (!role) return alert("Please select a role");
-    setStep(2);
-  };
-
-  const handleStep2 = () => {
-    if (role === "Customer" && !city) return alert("Please select your city");
-    if (role === "Customer") return setStep(3); // Go to address
-    setStep(4); // Non-Customer goes to Terms
-  };
-
-  const handleStep3 = () => {
-    if (!address) return alert("Please enter your address");
-    setStep(4); // Go to Terms
-  };
-
-  const handleTermsScroll = () => {
-    const el = termsRef.current;
-    if (el && el.scrollTop + el.clientHeight >= el.scrollHeight - 5) {
-      setCanCheckAgree(true);
-    }
-  };
-
-  const handleStep4 = () => {
-    if (!agreed) return alert("You must agree to the Terms of Service");
-    setShowConfetti(true);
-    setTimeout(() => {
-      setShowConfetti(false);
-      setLoggedIn(true);
-    }, 1000);
-  };
-
+  /* Logout */
   const handleLogout = () => {
     setEmail("");
     setPassword("");
@@ -93,24 +75,73 @@ export default function App() {
     setCanCheckAgree(false);
     setLoggedIn(false);
     setStep(1);
-    localStorage.removeItem("userData"); // clear persistent login
+    localStorage.removeItem("userData");
   };
 
-  // ---------- LOGGED-IN VIEWS ----------
+  /* Validation and step progression */
+  const validateStep1 = () => {
+    if (!email.trim() || !password.trim())
+      return alert("Please enter email and password");
+    if (!role) return alert("Please select a role");
+
+    if (isDriver || isStaff) {
+      // For drivers/staff: skip steps, show dashboard immediately
+      setShowConfetti(true);
+      setTimeout(() => {
+        setShowConfetti(false);
+        setLoggedIn(true);
+      }, 500);
+    } else {
+      // For customers, go to city selection
+      setStep(2);
+    }
+  };
+
+  const validateStep2 = () => {
+    if (!city) return alert("Please select your city");
+    setStep(3);
+  };
+
+  const validateStep3 = () => {
+    if (!address.trim()) return alert("Please enter your address");
+    setStep(4);
+  };
+
+  const completeSignup = () => {
+    if (!agreed) return alert("You must agree to the Terms of Service");
+    setShowConfetti(true);
+    setTimeout(() => {
+      setShowConfetti(false);
+      setLoggedIn(true);
+    }, 500);
+  };
+
+  const handleTermsScroll = () => {
+    const el = termsRef.current;
+    if (!el) return;
+    if (el.scrollTop + el.clientHeight >= el.scrollHeight - 5)
+      setCanCheckAgree(true);
+  };
+
+  /* Logged in view */
   if (loggedIn) {
     return (
       <div className="app">
         <div className="dashboardWrapper">
-          {role === "Customer" && (
+          {isCustomer && (
             <UserHome name={email} city={city} address={address} />
           )}
-          {role === "Driver" && <DriverDashboard />}
-          {role === "Staff" && (
+          {isDriver && <DriverDashboard />}
+          {isStaff && (
             <div className="dashboard">
               <h1>Welcome, {email} (Staff)</h1>
             </div>
           )}
         </div>
+
+        <button className="logoutBtn" onClick={handleLogout}>
+          Logout
+        </button>
 
         {showConfetti && (
           <div className="confetti">
@@ -127,130 +158,104 @@ export default function App() {
     );
   }
 
-  // ---------- STEP 1: Email + Role ----------
+  /* Login/signup steps */
+  const renderCard = (content: React.ReactNode) => (
+    <div className="app">
+      <div className="loginCard">{content}</div>
+    </div>
+  );
+
   if (step === 1) {
-    return (
-      <div className="app">
-        <div className="loginCard">
-          <h1 className="logo">Swift2Me</h1>
-          <p className="subtitle">
-            Enter your email, password, and select a role
-          </p>
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <div className="roleSelection">
-            {["Customer", "Driver", "Staff"].map((r) => (
-              <label key={r}>
-                <input
-                  type="radio"
-                  name="role"
-                  value={r}
-                  checked={role === r}
-                  onChange={(e) => setRole(e.target.value)}
-                />
-                <span>{r}</span>
-              </label>
-            ))}
-          </div>
-          <button className="loginBtn" onClick={handleStep1}>
-            Next
-          </button>
+    return renderCard(
+      <>
+        <h1 className="logo">Swift2Me</h1>
+        <p className="subtitle">
+          Enter your email, password, and select a role
+        </p>
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+
+        <div className="roleSelection">
+          {(["Customer", "Driver", "Staff"] as Role[]).map((r) => (
+            <label key={r}>
+              <input
+                type="radio"
+                name="role"
+                value={r}
+                checked={role === r}
+                onChange={(e) => setRole(e.target.value as Role)}
+              />
+              <span>{r}</span>
+            </label>
+          ))}
         </div>
-      </div>
+
+        <button className="loginBtn" onClick={validateStep1}>
+          Next
+        </button>
+      </>
     );
   }
 
-  // ---------- STEP 2: City ----------
-  if (step === 2 && role === "Customer") {
-    return (
-      <div className="app">
-        <div className="loginCard">
-          <h1 className="logo">Choose Your City</h1>
-          <p className="subtitle">Only Midlothian / West Lothian cities</p>
-          <select value={city} onChange={(e) => setCity(e.target.value)}>
-            <option value="">Select your city</option>
-            {scotlandCities.map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
-            ))}
-          </select>
-          <div className="btnRow">
-            <button className="loginBtn" onClick={() => setStep(1)}>
-              Back
-            </button>
-            <button className="loginBtn" onClick={handleStep2}>
-              Next
-            </button>
-          </div>
+  if (step === 2 && isCustomer) {
+    return renderCard(
+      <>
+        <h1 className="logo">Choose Your City</h1>
+        <select value={city} onChange={(e) => setCity(e.target.value)}>
+          <option value="">Select your city</option>
+          {SCOTLAND_CITIES.map((c) => (
+            <option key={c} value={c}>
+              {c}
+            </option>
+          ))}
+        </select>
+
+        <div className="btnRow">
+          <button onClick={() => setStep(1)}>Back</button>
+          <button onClick={validateStep2}>Next</button>
         </div>
-      </div>
+      </>
     );
   }
 
-  // ---------- STEP 3: Address ----------
-  if (step === 3 && role === "Customer") {
-    return (
-      <div className="app">
-        <div className="loginCard">
-          <h1 className="logo">Enter Your Address</h1>
-          <input
-            type="text"
-            placeholder="Address"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-          />
-          <div className="btnRow">
-            <button className="loginBtn" onClick={() => setStep(2)}>
-              Back
-            </button>
-            <button className="loginBtn" onClick={handleStep3}>
-              Next
-            </button>
-          </div>
+  if (step === 3 && isCustomer) {
+    return renderCard(
+      <>
+        <h1 className="logo">Enter Your Address</h1>
+        <input
+          type="text"
+          placeholder="Address"
+          value={address}
+          onChange={(e) => setAddress(e.target.value)}
+        />
+
+        <div className="btnRow">
+          <button onClick={() => setStep(2)}>Back</button>
+          <button onClick={validateStep3}>Next</button>
         </div>
-      </div>
+      </>
     );
   }
 
-  // ---------- STEP 4: Terms ----------
-  if (step === 4) {
+  if (step === 4 && isCustomer) {
     return (
       <div className="app">
         <div className="termsCard">
           <h1 className="termsTitle">Terms of Service</h1>
           <div className="termsBox" ref={termsRef} onScroll={handleTermsScroll}>
-            <p>
-              Welcome to <strong>SwiftEats</strong>! By signing up, you agree to
-              our terms.
-            </p>
-            <p>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec nec
-              felis nec nisl fermentum fermentum.
-            </p>
-            <p>
-              Curabitur auctor, justo at tincidunt luctus, lectus lorem porta
-              erat, at sollicitudin nisl nisl at elit.
-            </p>
-            <p>
-              Vestibulum ante ipsum primis in faucibus orci luctus et ultrices
-              posuere cubilia curae; Pellentesque habitant morbi tristique
-              senectus et netus et malesuada fames ac turpis egestas.
-            </p>
-            <p>
-              Add more content here so the user must scroll to the bottom before
-              enabling the checkbox.
-            </p>
+            <p>Welcome to Swift2Me.</p>
+            <p>Scroll to bottom to enable agreement.</p>
+            <p style={{ marginTop: "600px" }}>End of Terms.</p>
           </div>
 
           <label className="agreeLabel">
@@ -260,21 +265,12 @@ export default function App() {
               disabled={!canCheckAgree}
               onChange={(e) => setAgreed(e.target.checked)}
             />
-            I have read and agree to the Terms of Service
+            I agree to the Terms
           </label>
 
           <div className="btnRow">
-            <button
-              className="loginBtn"
-              onClick={() => setStep(role === "Customer" ? 3 : 2)}
-            >
-              Back
-            </button>
-            <button
-              className="loginBtn"
-              disabled={!agreed}
-              onClick={handleStep4}
-            >
+            <button onClick={() => setStep(3)}>Back</button>
+            <button disabled={!agreed} onClick={completeSignup}>
               Accept & Continue
             </button>
           </div>
