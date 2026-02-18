@@ -1,17 +1,11 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState } from "react";
 import "./UserHome.css";
-
-type Item = {
-  id: number;
-  name: string;
-  price: number;
-  image: string;
-  shop: string;
-  brand: string;
-  type: string;
-  shopImage: string;
-  openHours: Record<string, { open: string; close: string }>;
-};
+import { mockItems, Item, categories } from "./mockItems";
+import BrandCard from "./components/BrandCard";
+import LocationCard from "./components/LocationCard";
+import ItemCard from "./components/ItemCard";
+import AvatarDropdown from "./components/AvatarDropdown";
+import CategoryButton from "./components/CategoryButton";
 
 type Props = {
   name: string;
@@ -19,234 +13,6 @@ type Props = {
   onLogout: () => void;
 };
 
-const mockItems: Item[] = [
-  {
-    id: 3,
-    name: "Bread",
-    price: 1.0,
-    image: "/images/bread.jpg",
-    shop: "Asda Straiton Superstore",
-    brand: "Asda",
-    type: "Grocery",
-    shopImage:
-      "https://static.where-e.com/United_Kingdom/Asda-Straiton-Superstore_0c7dbd6b34741eaee989aa4992a9f6d5.jpg",
-    openHours: {
-      Mon: { open: "07:00", close: "22:00" },
-      Tue: { open: "07:00", close: "22:00" },
-      Wed: { open: "07:00", close: "22:00" },
-      Thu: { open: "07:00", close: "22:00" },
-      Fri: { open: "07:00", close: "22:00" },
-      Sat: { open: "07:00", close: "22:00" },
-      Sun: { open: "08:00", close: "20:00" },
-    },
-  },
-];
-
-const categories = ["All", "Grocery", "PC Supplies", "Drinks", "Desserts"];
-
-// --- Category Button ---
-function CategoryButton({
-  category,
-  isActive,
-  onClick,
-}: {
-  category: string;
-  isActive: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      className={`categoryBtn ${isActive ? "active" : ""}`}
-      onClick={onClick}
-    >
-      {category}
-    </button>
-  );
-}
-
-// --- Brand Card ---
-function BrandCard({
-  brandName,
-  items,
-  onViewBrand,
-}: {
-  brandName: string;
-  items: Item[];
-  onViewBrand: () => void;
-}) {
-  return (
-    <div className="itemCard">
-      <div className="itemInfo">
-        <h3>{brandName}</h3>
-        <p>{items.length} locations</p>
-        <button className="addBtn" onClick={onViewBrand}>
-          View Shops
-        </button>
-      </div>
-    </div>
-  );
-}
-
-// --- Location Card ---
-function LocationCard({
-  shopName,
-  shopImage,
-  openHours,
-  onSelectShop,
-}: {
-  shopName: string;
-  shopImage: string;
-  openHours: Record<string, { open: string; close: string }>;
-  onSelectShop: () => void;
-}) {
-  const [showHours, setShowHours] = useState(false);
-  const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-  const now = new Date();
-  const day = days[now.getDay()];
-  const currentTime = `${now.getHours().toString().padStart(2, "0")}:${now
-    .getMinutes()
-    .toString()
-    .padStart(2, "0")}`;
-  const todayHours = openHours[day];
-  const isOpen =
-    currentTime >= todayHours.open && currentTime <= todayHours.close;
-
-  const openInMaps = () => {
-    const query = encodeURIComponent(`${shopName}`);
-    const url = `https://www.google.com/maps/search/?api=1&query=${query}`;
-    window.open(url, "_blank");
-  };
-
-  return (
-    <div className="itemCard">
-      <img src={shopImage} alt={shopName} className="shopImage" />
-      <div className="itemInfo">
-        <h3>{shopName}</h3>
-        <p>
-          Today: {todayHours.open} - {todayHours.close}{" "}
-          <span style={{ color: isOpen ? "green" : "red", fontWeight: "bold" }}>
-            ({isOpen ? "Open" : "Closed"})
-          </span>
-        </p>
-
-        {showHours && (
-          <div className="weeklyHours">
-            {Object.entries(openHours).map(([dayName, hours]) => (
-              <p
-                key={dayName}
-                style={{ fontWeight: dayName === day ? "bold" : "normal" }}
-              >
-                {dayName}: {hours.open} - {hours.close}
-              </p>
-            ))}
-          </div>
-        )}
-
-        <button
-          className="addBtn"
-          style={{ marginTop: "10px" }}
-          onClick={() => {
-            setShowHours(!showHours);
-            onSelectShop();
-          }}
-        >
-          {showHours ? "Hide Open Times" : "View Shop Menu"}
-        </button>
-        <button className="addBtn mapBtn" onClick={openInMaps}>
-          View on Map
-        </button>
-      </div>
-    </div>
-  );
-}
-
-// --- Item Card ---
-function ItemCard({
-  item,
-  onAddToCart,
-}: {
-  item: Item;
-  onAddToCart: (item: Item) => void;
-}) {
-  const [added, setAdded] = useState(false);
-  return (
-    <div className="itemCard">
-      <img src={item.image} alt={item.name} className="itemImage" />
-      <div className="itemInfo">
-        <h3>{item.name}</h3>
-        <p className="shopName">{item.shop}</p>
-        <p className="itemPrice">£{item.price.toFixed(2)}</p>
-        <button
-          className={`addBtn ${added ? "added" : ""}`}
-          onClick={() => {
-            onAddToCart(item);
-            setAdded(true);
-            setTimeout(() => setAdded(false), 1000);
-          }}
-        >
-          {added ? "Added!" : "Add to Cart"}
-        </button>
-      </div>
-    </div>
-  );
-}
-
-// --- Avatar Dropdown with Nested Menu ---
-function AvatarDropdown({ onLogout }: { onLogout: () => void }) {
-  const [open, setOpen] = useState(false);
-  const [openDeliveries, setOpenDeliveries] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (ref.current && !ref.current.contains(event.target as Node)) {
-        setOpen(false);
-        setOpenDeliveries(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  return (
-    <div className="avatarWrapper" ref={ref}>
-      <img
-        src="/images/avatar.png"
-        alt="Profile"
-        className="avatar"
-        onClick={() => setOpen(!open)}
-      />
-      {open && (
-        <div className="avatarDropdown">
-          <div className="dropdownItem">MyAccount</div>
-
-          <div
-            className="dropdownItem nestedItem"
-            onClick={() => setOpenDeliveries(!openDeliveries)}
-          >
-            Deliveries {openDeliveries ? "▲" : "▼"}
-          </div>
-          {openDeliveries && (
-            <div className="nestedDropdown">
-              <div className="dropdownItem">My Orders</div>
-              <div className="dropdownItem">Waiting For Driver</div>
-              <div className="dropdownItem">Cancelled</div>
-              <div className="dropdownItem">Refunded</div>
-            </div>
-          )}
-
-          <div className="dropdownItem">Wallet</div>
-          <div className="dropdownItem">Support</div>
-          <div className="dropdownItem" onClick={onLogout}>
-            Logout
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// --- UserHome Component ---
 export default function UserHome({ name, city, onLogout }: Props) {
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
@@ -255,10 +21,12 @@ export default function UserHome({ name, city, onLogout }: Props) {
   const [shopCategory, setShopCategory] = useState("All");
   const [cart, setCart] = useState<Item[]>([]);
 
+  // --- Cart Handlers ---
   const addToCart = (item: Item) => setCart((prev) => [...prev, item]);
   const removeFromCart = (index: number) =>
     setCart((prev) => prev.filter((_, i) => i !== index));
 
+  // --- Filter Items ---
   const filteredItems = mockItems.filter((item) => {
     const matchesSearch =
       item.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -281,6 +49,7 @@ export default function UserHome({ name, city, onLogout }: Props) {
   const brandShops = selectedBrand
     ? filteredItems.filter((item) => item.brand === selectedBrand)
     : [];
+
   const shopItems = viewShop
     ? filteredItems.filter(
         (item) =>
@@ -335,7 +104,6 @@ export default function UserHome({ name, city, onLogout }: Props) {
             <li className="navItem">About</li>
             <li className="navItem">Support</li>
           </ul>
-
           <AvatarDropdown onLogout={onLogout} />
         </div>
       </nav>
@@ -384,18 +152,20 @@ export default function UserHome({ name, city, onLogout }: Props) {
               ×
             </button>
           </div>
+
+          {/* --- Shop Categories --- */}
           <div className="categories">
             {categories.map((cat) => (
               <CategoryButton
                 key={cat}
                 category={cat}
                 isActive={shopCategory === cat}
-                onClick={() =>
-                  setShopCategory(shopCategory === cat ? "All" : cat)
-                }
+                onClick={() => setShopCategory(cat)}
               />
             ))}
           </div>
+
+          {/* --- Shop Items --- */}
           <div className="itemsGrid">
             {shopItems.length ? (
               shopItems.map((item) => (
