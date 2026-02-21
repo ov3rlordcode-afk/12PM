@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import "./App.css";
+import Header from "./Header";
 import UserHome from "./home/UserHome";
 import DriverDashboard from "./user/drivers/Driver";
 import DriverSteps from "./steps/driverssteps";
@@ -35,11 +36,9 @@ export default function App() {
   const [role, setRole] = useState<Role>("");
   const [step, setStep] = useState<Step>(1);
 
-  // Customer fields
   const [city, setCity] = useState("");
   const [address, setAddress] = useState("");
 
-  // Driver fields
   const [license, setLicense] = useState("");
   const [vehicleType, setVehicleType] = useState("");
   const [vehicleInfo, setVehicleInfo] = useState("");
@@ -105,11 +104,14 @@ export default function App() {
   const handleLogin = () => {
     if (!email.trim() || !password.trim())
       return alert("Please enter email and password");
+
     const stored = localStorage.getItem("userData");
     if (!stored) return alert("No account found. Please sign up.");
+
     try {
       const user: StoredUser = JSON.parse(stored);
       if (user.email !== email) return alert("Account not found.");
+
       setRole(user.role);
       setCity(user.city ?? "");
       setAddress(user.address ?? "");
@@ -144,10 +146,13 @@ export default function App() {
   const validateStep1 = () => {
     if (!email.trim() || !password.trim())
       return alert("Enter email and password");
+
     if (!role) return alert("Select a role");
+
     if (isDriver && !/^(?=.*[A-Z])(?=.*\d).{8,}$/.test(password)) {
       return alert("UK password must be 8+ chars, include uppercase & number");
     }
+
     setStep(2);
   };
 
@@ -160,17 +165,21 @@ export default function App() {
 
   const validateStep3 = () => {
     if (isCustomer && !address.trim()) return alert("Enter your address");
+
     if (isDriver) {
       if (!vehicleType) return alert("Select vehicle type");
       if (!vehicleInfo.trim()) return alert("Enter vehicle info");
       if (!licensePhoto) return alert("Upload photo of driving license");
     }
+
     setStep(4);
   };
 
   const completeSignup = () => {
     if (!agreed) return alert("You must agree to the Terms of Service");
+
     setShowConfetti(true);
+
     setTimeout(() => {
       setShowConfetti(false);
       setLoggedIn(true);
@@ -198,6 +207,7 @@ export default function App() {
           {isCustomer && (
             <UserHome name={email} city={city} address={address} />
           )}
+
           {isDriver && (
             <DriverDashboard
               name={email}
@@ -207,9 +217,11 @@ export default function App() {
             />
           )}
         </div>
+
         <button className="logoutBtn" onClick={handleLogout}>
           Logout
         </button>
+
         {showConfetti && (
           <div className="confetti">
             {Array.from({ length: 100 }).map((_, i) => (
@@ -225,51 +237,24 @@ export default function App() {
     );
   }
 
-  /* Step 1: Email / Password / Role */
+  /* Step 1 (Header moved to separate component) */
   if (step === 1) {
     return renderCard(
-      <>
-        <h1 className="logo">Swift2Me</h1>
-        <p className="subtitle">{isLoginMode ? "Login" : "Create Account"}</p>
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        {!isLoginMode && (
-          <div className="roleSelection">
-            {(["Customer", "Driver"] as Role[]).map((r) => (
-              <label key={r}>
-                <input
-                  type="radio"
-                  name="role"
-                  value={r}
-                  checked={role === r}
-                  onChange={(e) => setRole(e.target.value as Role)}
-                />
-                <span>{r}</span>
-              </label>
-            ))}
-          </div>
-        )}
-        <button
-          className="loginBtn"
-          onClick={isLoginMode ? handleLogin : validateStep1}
-        >
-          {isLoginMode ? "Login" : "Next"}
-        </button>
-      </>
+      <Header
+        email={email}
+        password={password}
+        role={role}
+        isLoginMode={isLoginMode}
+        setEmail={setEmail}
+        setPassword={setPassword}
+        setRole={setRole}
+        handleLogin={handleLogin}
+        validateStep1={validateStep1}
+      />
     );
   }
 
-  /* Step 2 & 3: Customers or Drivers */
+  /* Step 2 & 3 */
   if ((step === 2 || step === 3) && isCustomer) {
     return renderCard(
       <UserSteps
@@ -305,16 +290,18 @@ export default function App() {
     );
   }
 
-  /* Step 4: Terms */
+  /* Step 4 */
   if (step === 4) {
     return renderCard(
       <>
         <h1 className="termsTitle">Terms of Service</h1>
+
         <div className="termsBox" ref={termsRef} onScroll={handleTermsScroll}>
           <p>Welcome to Swift2Me.</p>
           <p>Scroll to bottom to enable agreement.</p>
           <p style={{ marginTop: "600px" }}>End of Terms.</p>
         </div>
+
         <label className="agreeLabel">
           <input
             type="checkbox"
@@ -324,6 +311,7 @@ export default function App() {
           />
           I agree to the Terms
         </label>
+
         <div className="btnRow">
           <button onClick={() => setStep(3)}>Back</button>
           <button disabled={!agreed} onClick={completeSignup}>
