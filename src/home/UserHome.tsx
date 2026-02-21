@@ -20,20 +20,27 @@ export default function UserHome({ name, city, onLogout }: Props) {
   const [viewShop, setViewShop] = useState<string | null>(null);
   const [shopCategory, setShopCategory] = useState("All");
   const [cart, setCart] = useState<Item[]>([]);
+  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
 
-  // --- Cart Handlers ---
+  const toggleDropdown = (menu: string) => {
+    setActiveDropdown((prev) => (prev === menu ? null : menu));
+  };
+
+  // --- Cart ---
   const addToCart = (item: Item) => setCart((prev) => [...prev, item]);
   const removeFromCart = (index: number) =>
     setCart((prev) => prev.filter((_, i) => i !== index));
 
-  // --- Filter Items ---
+  // --- Filters ---
   const filteredItems = mockItems.filter((item) => {
     const matchesSearch =
       item.name.toLowerCase().includes(search.toLowerCase()) ||
       item.shop.toLowerCase().includes(search.toLowerCase()) ||
       item.brand.toLowerCase().includes(search.toLowerCase());
+
     const matchesCategory =
       activeCategory === "All" || item.type === activeCategory;
+
     return matchesSearch && matchesCategory;
   });
 
@@ -68,10 +75,11 @@ export default function UserHome({ name, city, onLogout }: Props) {
 
   return (
     <div className="userHome app">
-      {/* --- Header --- */}
+      {/* ================= NAVBAR ================= */}
       <nav className="homeNavbar improvedNavbar">
         <div className="navLeft">
           <h2 className="logo">Swift2Me</h2>
+
           <input
             type="text"
             placeholder="Search items or shops..."
@@ -79,6 +87,7 @@ export default function UserHome({ name, city, onLogout }: Props) {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
+
           {search && (
             <div className="searchDropdown">
               {searchResults.length ? (
@@ -100,15 +109,60 @@ export default function UserHome({ name, city, onLogout }: Props) {
 
         <div className="navRight">
           <ul className="navMenu">
-            <li className="navItem">J</li>
-            <li className="navItem">About</li>
-            <li className="navItem">Support</li>
+            {/* FEATURED */}
+            <li
+              className="navItem dropdown"
+              onMouseEnter={() => toggleDropdown("featured")}
+              onMouseLeave={() => setActiveDropdown(null)}
+            >
+              Featured ▾
+              {activeDropdown === "featured" && (
+                <div className="dropdownMenu">
+                  <div className="dropdownItem">🔥 Trending</div>
+                  <div className="dropdownItem">⭐ Top Rated</div>
+                  <div className="dropdownItem">💎 New Arrivals</div>
+                </div>
+              )}
+            </li>
+
+            {/* ABOUT */}
+            <li
+              className="navItem dropdown"
+              onMouseEnter={() => toggleDropdown("about")}
+              onMouseLeave={() => setActiveDropdown(null)}
+            >
+              About ▾
+              {activeDropdown === "about" && (
+                <div className="dropdownMenu">
+                  <div className="dropdownItem">Our Story</div>
+                  <div className="dropdownItem">How It Works</div>
+                  <div className="dropdownItem">Careers</div>
+                </div>
+              )}
+            </li>
+
+            {/* SUPPORT */}
+            <li
+              className="navItem dropdown"
+              onMouseEnter={() => toggleDropdown("support")}
+              onMouseLeave={() => setActiveDropdown(null)}
+            >
+              Support ▾
+              {activeDropdown === "support" && (
+                <div className="dropdownMenu">
+                  <div className="dropdownItem">Help Center</div>
+                  <div className="dropdownItem">Contact Us</div>
+                  <div className="dropdownItem">Report Issue</div>
+                </div>
+              )}
+            </li>
           </ul>
+
           <AvatarDropdown onLogout={onLogout} />
         </div>
       </nav>
 
-      {/* --- Brands / Shops --- */}
+      {/* ================= BRAND VIEW ================= */}
       {!selectedBrand && !viewShop ? (
         <div className="itemsGrid">
           {Object.entries(itemsByBrand).map(([brandName, items]) => (
@@ -143,7 +197,7 @@ export default function UserHome({ name, city, onLogout }: Props) {
         </>
       ) : null}
 
-      {/* --- Floating Shop Menu --- */}
+      {/* ================= SHOP MENU ================= */}
       {viewShop && (
         <div className="floatingMenu">
           <div className="menuHeader">
@@ -153,7 +207,6 @@ export default function UserHome({ name, city, onLogout }: Props) {
             </button>
           </div>
 
-          {/* --- Shop Categories --- */}
           <div className="categories">
             {categories.map((cat) => (
               <CategoryButton
@@ -165,7 +218,6 @@ export default function UserHome({ name, city, onLogout }: Props) {
             ))}
           </div>
 
-          {/* --- Shop Items --- */}
           <div className="itemsGrid">
             {shopItems.length ? (
               shopItems.map((item) => (
@@ -178,34 +230,15 @@ export default function UserHome({ name, city, onLogout }: Props) {
         </div>
       )}
 
-      {/* --- Floating Cart --- */}
+      {/* ================= CART ================= */}
       {cart.length > 0 && (
         <div className="cartButton">
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            🛒 {cart.length} items | £{totalPrice.toFixed(2)}
-          </div>
-          <div
-            style={{ marginTop: "10px", maxHeight: "200px", overflowY: "auto" }}
-          >
+          🛒 {cart.length} items | £{totalPrice.toFixed(2)}
+          <div className="cartItems">
             {cart.map((item, index) => (
-              <div
-                key={index}
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  backgroundColor: "#FF8A50",
-                  padding: "5px 10px",
-                  borderRadius: "10px",
-                  marginTop: "5px",
-                }}
-              >
+              <div key={index} className="cartItem">
                 <span>{item.name}</span>
-                <span
-                  style={{ cursor: "pointer" }}
-                  onClick={() => removeFromCart(index)}
-                >
-                  ❌
-                </span>
+                <span onClick={() => removeFromCart(index)}>❌</span>
               </div>
             ))}
           </div>
