@@ -20,53 +20,40 @@ export default function UserHome({ name, city, onLogout }: Props) {
   const [viewShop, setViewShop] = useState<string | null>(null);
   const [shopCategory, setShopCategory] = useState("All");
   const [cart, setCart] = useState<Item[]>([]);
-  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
-  const toggleDropdown = (menu: string) => {
-    setActiveDropdown((prev) => (prev === menu ? null : menu));
-  };
+  const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
 
-  // --- Cart ---
   const addToCart = (item: Item) => setCart((prev) => [...prev, item]);
   const removeFromCart = (index: number) =>
     setCart((prev) => prev.filter((_, i) => i !== index));
-
   const totalPrice = cart.reduce((sum, item) => sum + item.price, 0);
 
-  // --- Place Order ---
   const placeOrder = () => {
     if (!cart.length) return alert("Cart is empty!");
-
     const storedOrders = localStorage.getItem("orders");
     const orders = storedOrders ? JSON.parse(storedOrders) : [];
-
     const newOrder = {
       id: Date.now(),
       customer: name,
       city,
-      address: `${city} address placeholder`, // could add real address input
+      address: `${city} address placeholder`,
       items: cart.map((i) => i.name),
       reward: Math.floor(totalPrice),
       status: "pending" as const,
     };
-
-    const updatedOrders = [...orders, newOrder];
-    localStorage.setItem("orders", JSON.stringify(updatedOrders));
-    setCart([]); // clear cart
-
+    localStorage.setItem("orders", JSON.stringify([...orders, newOrder]));
+    setCart([]);
     alert("Order placed! Operator will dispatch a driver.");
   };
 
-  // --- Filters ---
   const filteredItems = mockItems.filter((item) => {
     const matchesSearch =
       item.name.toLowerCase().includes(search.toLowerCase()) ||
       item.shop.toLowerCase().includes(search.toLowerCase()) ||
       item.brand.toLowerCase().includes(search.toLowerCase());
-
     const matchesCategory =
       activeCategory === "All" || item.type === activeCategory;
-
     return matchesSearch && matchesCategory;
   });
 
@@ -93,19 +80,50 @@ export default function UserHome({ name, city, onLogout }: Props) {
 
   return (
     <div className="userHome app">
-      {/* ================= NAVBAR ================= */}
-      <nav className="homeNavbar improvedNavbar">
+      {/* ================= NORMAL NAVBAR ================= */}
+      <nav className="homeNavbar">
         <div className="navLeft">
           <h2 className="logo">Swift2Me</h2>
+
+          <ul className="navMenu">
+            <li
+              onClick={() => {
+                setSelectedBrand(null);
+                setViewShop(null);
+              }}
+            >
+              Home
+            </li>
+            <li onClick={() => setSelectedBrand(null)}>Brands</li>
+            <li
+              className="navItem"
+              onMouseEnter={toggleDropdown}
+              onMouseLeave={toggleDropdown}
+            >
+              Orders
+              {dropdownOpen && (
+                <div className="dropdownMenu">
+                  <div className="dropdownItem">Pending Orders</div>
+                  <div className="dropdownItem">Completed Orders</div>
+                  <div className="dropdownItem">Cancelled Orders</div>
+                </div>
+              )}
+            </li>
+            <li onClick={() => alert("Profile page coming soon!")}>Profile</li>
+            <li className="logoutBtn" onClick={onLogout}>
+              Logout
+            </li>
+          </ul>
+        </div>
+
+        <div className="navRight">
           <input
             type="text"
-            placeholder="Search items or shops..."
-            className="searchInput"
+            placeholder="Search..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
+            className="searchInput"
           />
-        </div>
-        <div className="navRight">
           <AvatarDropdown onLogout={onLogout} />
         </div>
       </nav>
@@ -113,18 +131,27 @@ export default function UserHome({ name, city, onLogout }: Props) {
       {/* ================= BRAND VIEW ================= */}
       {!selectedBrand && !viewShop ? (
         <div className="itemsGrid">
-          {Object.entries(itemsByBrand).map(([brandName, items]) => (
-            <BrandCard
-              key={brandName}
-              brandName={brandName}
-              items={items}
-              onViewBrand={() => setSelectedBrand(brandName)}
-            />
-          ))}
+          {Object.entries(itemsByBrand).length ? (
+            Object.entries(itemsByBrand).map(([brandName, items]) => (
+              <BrandCard
+                key={brandName}
+                brandName={brandName}
+                items={items}
+                onViewBrand={() => setSelectedBrand(brandName)}
+              />
+            ))
+          ) : (
+            <p className="noResults">No brands match your search 😢</p>
+          )}
         </div>
       ) : selectedBrand && !viewShop ? (
         <>
-          <h2 style={{ margin: "20px 0" }}>{selectedBrand} Locations</h2>
+          <div className="brandHeader">
+            <h2>{selectedBrand} Locations</h2>
+            <button className="backBtn" onClick={() => setSelectedBrand(null)}>
+              ← Back to Brands
+            </button>
+          </div>
           <div className="itemsGrid">
             {brandShops.map((item) => (
               <LocationCard
@@ -139,20 +166,15 @@ export default function UserHome({ name, city, onLogout }: Props) {
               />
             ))}
           </div>
-          <button className="backBtn" onClick={() => setSelectedBrand(null)}>
-            ← Back to Brands
-          </button>
         </>
       ) : null}
 
       {/* ================= SHOP MENU ================= */}
       {viewShop && (
-        <div className="floatingMenu">
-          <div className="menuHeader">
+        <div className="shopMenu">
+          <div className="shopHeader">
             <h3>{viewShop} Menu</h3>
-            <button className="closeMenuBtn" onClick={() => setViewShop(null)}>
-              ×
-            </button>
+            <button onClick={() => setViewShop(null)}>× Close</button>
           </div>
 
           <div className="categories">
@@ -182,9 +204,7 @@ export default function UserHome({ name, city, onLogout }: Props) {
       {cart.length > 0 && (
         <div className="cartButton">
           🛒 {cart.length} items | £{totalPrice.toFixed(2)}
-          <button className="placeOrderBtn" onClick={placeOrder}>
-            Place Order
-          </button>
+          <button onClick={placeOrder}>Place Order</button>
           <div className="cartItems">
             {cart.map((item, index) => (
               <div key={index} className="cartItem">

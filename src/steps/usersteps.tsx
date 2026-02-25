@@ -160,15 +160,44 @@ export default function UserSteps({
 
   /* ---------- STEP 4: SWITCH2ME ---------- */
   if (step === 4) {
+    const switchCards = [
+      {
+        title: "Fast & Reliable",
+        desc: "Orders arrive quickly from trusted local partners.",
+        img: "/images/step4_fast_delivery.jpg",
+      },
+      {
+        title: "Safe & Verified",
+        desc: "All delivery partners are fully verified and reliable.",
+        img: "/images/step4_safe_verified.jpg",
+      },
+      {
+        title: "Everything You Need",
+        desc: "Groceries, meals, essentials — all delivered.",
+        img: "/images/step4_everything.jpg",
+      },
+    ];
+
     return (
       <>
         <h1 className="logo">What is Switch2Me?</h1>
-        <div className={`inputWrapper floating`}>
-          <span>
-            Switch2Me connects you with trusted local partners for fast, safe,
-            and reliable deliveries. Everything you need is brought right to
-            your doorstep.
-          </span>
+        <div className="cityGrid">
+          {switchCards.map((c, idx) => (
+            <div
+              key={idx}
+              className="cityCard"
+              style={{
+                backgroundImage: `url(${c.img})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+              }}
+            >
+              <div className="cityOverlay">
+                <span className="cityName">{c.title}</span>
+                <span className="cityDesc">{c.desc}</span>
+              </div>
+            </div>
+          ))}
         </div>
         <div className="btnRow">
           <button onClick={() => setStep(3)}>Back</button>
@@ -180,16 +209,49 @@ export default function UserSteps({
 
   /* ---------- STEP 5: RULES ---------- */
   if (step === 5) {
+    const rulesCards = [
+      {
+        title: "Accuracy",
+        desc: "Provide correct addresses for smooth deliveries.",
+        img: "/images/rule_accuracy.jpg",
+      },
+      {
+        title: "Be Ready",
+        desc: "Be prepared to receive deliveries on time.",
+        img: "/images/rule_ready.jpg",
+      },
+      {
+        title: "Respect Partners",
+        desc: "Treat our delivery partners with respect.",
+        img: "/images/rule_respect.jpg",
+      },
+      {
+        title: "Safety & Hygiene",
+        desc: "Follow safety and hygiene guidelines.",
+        img: "/images/rule_safety.jpg",
+      },
+    ];
+
     return (
       <>
         <h1 className="logo">Know the Rules</h1>
-        <div className={`inputWrapper floating`}>
-          <ul>
-            <li>Provide accurate addresses.</li>
-            <li>Be ready to receive deliveries on time.</li>
-            <li>Respect our local partners.</li>
-            <li>Follow safety & hygiene guidelines.</li>
-          </ul>
+        <div className="cityGrid">
+          {rulesCards.map((r, idx) => (
+            <div
+              key={idx}
+              className="cityCard"
+              style={{
+                backgroundImage: `url(${r.img})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+              }}
+            >
+              <div className="cityOverlay">
+                <span className="cityName">{r.title}</span>
+                <span className="cityDesc">{r.desc}</span>
+              </div>
+            </div>
+          ))}
         </div>
         <div className="btnRow">
           <button onClick={() => setStep(4)}>Back</button>
@@ -201,17 +263,54 @@ export default function UserSteps({
 
   /* ---------- STEP 6: HOW WE WORK ---------- */
   if (step === 6) {
+    const howCards = [
+      {
+        title: "Place Your Order",
+        desc: "Choose your items and place your order seamlessly.",
+        img: "/images/how_order.jpg",
+      },
+      {
+        title: "Partner Accepts",
+        desc: "Nearest partner accepts and prepares your order.",
+        img: "/images/how_partner.jpg",
+      },
+      {
+        title: "Pickup & Delivery",
+        desc: "Items are picked up and delivered in real-time.",
+        img: "/images/how_pickup.jpg",
+      },
+      {
+        title: "Track Order",
+        desc: "Monitor your order live until it reaches you.",
+        img: "/images/how_track.jpg",
+      },
+      {
+        title: "Fast & Safe",
+        desc: "Enjoy speed, reliability, and safety every time.",
+        img: "/images/how_fast.jpg",
+      },
+    ];
+
     return (
       <>
         <h1 className="logo">How We Work</h1>
-        <div className={`inputWrapper floating`}>
-          <ol>
-            <li>You place your order on Switch2Me.</li>
-            <li>The nearest partner accepts it.</li>
-            <li>They pick up and deliver in real-time.</li>
-            <li>Track your order until it arrives.</li>
-            <li>Fast, reliable, safe — just like UberEats!</li>
-          </ol>
+        <div className="cityGrid">
+          {howCards.map((h, idx) => (
+            <div
+              key={idx}
+              className="cityCard"
+              style={{
+                backgroundImage: `url(${h.img})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+              }}
+            >
+              <div className="cityOverlay">
+                <span className="cityName">{h.title}</span>
+                <span className="cityDesc">{h.desc}</span>
+              </div>
+            </div>
+          ))}
         </div>
         <div className="btnRow">
           <button onClick={() => setStep(5)}>Back</button>
