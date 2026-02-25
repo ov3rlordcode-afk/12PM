@@ -1,0 +1,173 @@
+/* ---------- MODERN CARD ---------- */
+.modernCard {
+  border-radius: 15px;
+  overflow: hidden;
+  background: #0a0f1b;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.modernCard:hover {
+  transform: scale(1.02);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.7);
+}
+
+/* ---------- IMAGE WRAPPER ---------- */
+.shopImageWrapper {
+  position: relative;
+  width: 100%;
+  height: 180px;
+  background-size: cover;
+  background-position: center;
+}
+
+/* ---------- TOP OVERLAY (NAME + STATUS) ---------- */
+.overlayTop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 12px 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.6), transparent);
+}
+
+.overlayTop h3 {
+  margin: 0;
+  font-size: 1.4rem;
+  color: #fff;
+  font-weight: 700;
+}
+
+.statusTag {
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  color: #fff;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.statusTag.open {
+  background-color: green;
+}
+
+.statusTag.closed {
+  background-color: red;
+}
+
+/* ---------- FLOATING ICON BUTTONS ---------- */
+.floatingButtons {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  display: flex;
+  gap: 8px;
+}
+
+.iconBtn {
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  cursor: pointer;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.iconBtn:hover {
+  transform: scale(1.2);
+  background: rgba(0, 0, 0, 0.8);
+}
+
+.favorited {
+  color: #ff4d6d;
+}
+
+/* ---------- ITEM INFO ---------- */
+.itemInfo {
+  padding: 12px 15px;
+  color: #e2e8f0;
+}
+
+.todayHours {
+  margin: 5px 0 10px;
+}
+
+.openStatus {
+  color: green;
+  font-weight: bold;
+  margin-left: 5px;
+}
+
+.closedStatus {
+  color: red;
+  font-weight: bold;
+  margin-left: 5px;
+}
+
+/* ---------- WEEKLY HOURS ---------- */
+.weeklyHours {
+  border-top: 1px solid #475569;
+  padding-top: 8px;
+  margin-top: 5px;
+}
+
+.weeklyHours p {
+  margin: 3px 0;
+  font-size: 0.9rem;
+}
+
+.todayOpen {
+  color: green;
+  font-weight: bold;
+}
+
+.todayClosed {
+  color: red;
+  font-weight: bold;
+}
+
+/* ---------- BUTTON ROW ---------- */
+.btnRow {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.mainBtn {
+  flex: 1;
+  padding: 10px 0;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 0.95rem;
+  cursor: pointer;
+  background: linear-gradient(135deg, #ff4d6d, #ff9f1c);
+  color: white;
+  transition: all 0.2s ease;
+}
+
+.mainBtn:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, #ff3b50, #ff7a2c);
+}
+
+.mapBtn {
+  background: #06d6e1;
+  color: #0a0f1b;
+}
+
+.mapBtn:hover {
+  background: #00bcd4;
+}

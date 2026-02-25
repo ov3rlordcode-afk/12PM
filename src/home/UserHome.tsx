@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import "./UserHome.css";
 import { mockItems, Item, categories } from "./mockItems";
 import BrandCard from "./components/BrandCard";
-import LocationCard from "./components/LocationCard";
+import LocationCard from "./components/location/LocationCard";
 import ItemCard from "./components/ItemCard";
 import AvatarDropdown from "./components/AvatarDropdown";
 import CategoryButton from "./components/CategoryButton";
