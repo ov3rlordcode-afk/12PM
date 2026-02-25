@@ -31,6 +31,32 @@ export default function UserHome({ name, city, onLogout }: Props) {
   const removeFromCart = (index: number) =>
     setCart((prev) => prev.filter((_, i) => i !== index));
 
+  const totalPrice = cart.reduce((sum, item) => sum + item.price, 0);
+
+  // --- Place Order ---
+  const placeOrder = () => {
+    if (!cart.length) return alert("Cart is empty!");
+
+    const storedOrders = localStorage.getItem("orders");
+    const orders = storedOrders ? JSON.parse(storedOrders) : [];
+
+    const newOrder = {
+      id: Date.now(),
+      customer: name,
+      city,
+      address: `${city} address placeholder`, // could add real address input
+      items: cart.map((i) => i.name),
+      reward: Math.floor(totalPrice),
+      status: "pending" as const,
+    };
+
+    const updatedOrders = [...orders, newOrder];
+    localStorage.setItem("orders", JSON.stringify(updatedOrders));
+    setCart([]); // clear cart
+
+    alert("Order placed! Operator will dispatch a driver.");
+  };
+
   // --- Filters ---
   const filteredItems = mockItems.filter((item) => {
     const matchesSearch =
@@ -65,21 +91,12 @@ export default function UserHome({ name, city, onLogout }: Props) {
       )
     : [];
 
-  const searchResults = mockItems.filter(
-    (item) =>
-      item.name.toLowerCase().includes(search.toLowerCase()) ||
-      item.shop.toLowerCase().includes(search.toLowerCase())
-  );
-
-  const totalPrice = cart.reduce((sum, item) => sum + item.price, 0);
-
   return (
     <div className="userHome app">
       {/* ================= NAVBAR ================= */}
       <nav className="homeNavbar improvedNavbar">
         <div className="navLeft">
           <h2 className="logo">Swift2Me</h2>
-
           <input
             type="text"
             placeholder="Search items or shops..."
@@ -87,77 +104,8 @@ export default function UserHome({ name, city, onLogout }: Props) {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
-
-          {search && (
-            <div className="searchDropdown">
-              {searchResults.length ? (
-                searchResults.map((result) => (
-                  <div
-                    key={result.id}
-                    className="searchResult"
-                    onClick={() => setViewShop(result.shop)}
-                  >
-                    <strong>{result.shop}</strong> - {result.name}
-                  </div>
-                ))
-              ) : (
-                <div className="searchResult">No results found</div>
-              )}
-            </div>
-          )}
         </div>
-
         <div className="navRight">
-          <ul className="navMenu">
-            {/* FEATURED */}
-            <li
-              className="navItem dropdown"
-              onMouseEnter={() => toggleDropdown("featured")}
-              onMouseLeave={() => setActiveDropdown(null)}
-            >
-              Featured ▾
-              {activeDropdown === "featured" && (
-                <div className="dropdownMenu">
-                  <div className="dropdownItem">🔥 Trending</div>
-                  <div className="dropdownItem">⭐ Top Rated</div>
-                  <div className="dropdownItem">💎 New Arrivals</div>
-                </div>
-              )}
-            </li>
-
-            {/* ABOUT */}
-            <li
-              className="navItem dropdown"
-              onMouseEnter={() => toggleDropdown("about")}
-              onMouseLeave={() => setActiveDropdown(null)}
-            >
-              About ▾
-              {activeDropdown === "about" && (
-                <div className="dropdownMenu">
-                  <div className="dropdownItem">Our Story</div>
-                  <div className="dropdownItem">How It Works</div>
-                  <div className="dropdownItem">Careers</div>
-                </div>
-              )}
-            </li>
-
-            {/* SUPPORT */}
-            <li
-              className="navItem dropdown"
-              onMouseEnter={() => toggleDropdown("support")}
-              onMouseLeave={() => setActiveDropdown(null)}
-            >
-              Support ▾
-              {activeDropdown === "support" && (
-                <div className="dropdownMenu">
-                  <div className="dropdownItem">Help Center</div>
-                  <div className="dropdownItem">Contact Us</div>
-                  <div className="dropdownItem">Report Issue</div>
-                </div>
-              )}
-            </li>
-          </ul>
-
           <AvatarDropdown onLogout={onLogout} />
         </div>
       </nav>
@@ -234,6 +182,9 @@ export default function UserHome({ name, city, onLogout }: Props) {
       {cart.length > 0 && (
         <div className="cartButton">
           🛒 {cart.length} items | £{totalPrice.toFixed(2)}
+          <button className="placeOrderBtn" onClick={placeOrder}>
+            Place Order
+          </button>
           <div className="cartItems">
             {cart.map((item, index) => (
               <div key={index} className="cartItem">

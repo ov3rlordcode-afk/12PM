@@ -1,111 +1,82 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import "./Driver.css";
 
-interface Delivery {
+interface Order {
   id: number;
   customer: string;
-  pickup: string;
-  dropoff: string;
+  city: string;
+  address: string;
   items: string[];
   reward: number;
-  accepted: boolean;
-  completed: boolean;
-  eta?: number; // ETA in minutes
+  assignedDriver?: string; // operator assigns
+  status: "pending" | "assigned" | "completed";
+  acceptedAt?: number;
 }
 
-const DriverDashboard: React.FC = () => {
-  const [deliveries, setDeliveries] = useState<Delivery[]>([]);
+interface DriverDashboardProps {
+  name: string; // driver email
+}
+
+const DriverDashboard: React.FC<DriverDashboardProps> = ({ name }) => {
+  const [orders, setOrders] = useState<Order[]>([]);
   const [filter, setFilter] = useState<"all" | "pending" | "completed">("all");
   const [currentTime, setCurrentTime] = useState(Date.now());
 
-  // Load deliveries from localStorage or mock
+  // Load orders from localStorage and update live every 5 seconds
   useEffect(() => {
-    const stored = localStorage.getItem("driverDeliveries");
-    if (stored) {
-      setDeliveries(JSON.parse(stored));
-    } else {
-      const mock: Delivery[] = [
-        {
-          id: 1,
-          customer: "Alice",
-          pickup: "Tesco, Edinburgh",
-          dropoff: "Alice's Home, Musselburgh",
-          items: ["Milk", "Bread", "Eggs"],
-          reward: 12,
-          accepted: false,
-          completed: false,
-          eta: 20,
-        },
-        {
-          id: 2,
-          customer: "Bob",
-          pickup: "Sainsbury's, Livingston",
-          dropoff: "Bob's Apartment, Bathgate",
-          items: ["Chicken", "Rice", "Vegetables"],
-          reward: 15,
-          accepted: false,
-          completed: false,
-          eta: 25,
-        },
-        {
-          id: 3,
-          customer: "Charlie",
-          pickup: "Morrisons, Linlithgow",
-          dropoff: "Charlie, Dalkeith",
-          items: ["Juice", "Snacks", "Cheese"],
-          reward: 10,
-          accepted: false,
-          completed: false,
-          eta: 15,
-        },
-      ];
-      setDeliveries(mock);
-    }
+    const loadOrders = () => {
+      const storedOrders = localStorage.getItem("orders");
+      setOrders(storedOrders ? JSON.parse(storedOrders) : []);
+    };
+
+    loadOrders(); // initial load
+    const interval = setInterval(loadOrders, 5000); // poll every 5s
+    return () => clearInterval(interval);
   }, []);
 
-  // Persist deliveries
+  // Persist orders when status changes (completed/accepted)
   useEffect(() => {
-    localStorage.setItem("driverDeliveries", JSON.stringify(deliveries));
-  }, [deliveries]);
+    localStorage.setItem("orders", JSON.stringify(orders));
+  }, [orders]);
 
-  // Timer for countdown
+  // Timer for ETA countdown
   useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(Date.now()), 60000); // update every minute
+    const timer = setInterval(() => setCurrentTime(Date.now()), 60000);
     return () => clearInterval(timer);
   }, []);
 
-  const acceptJob = (id: number) => {
-    setDeliveries((prev) =>
-      prev.map((d) => (d.id === id ? { ...d, accepted: true } : d))
-    );
-  };
-
   const toggleComplete = (id: number) => {
-    setDeliveries((prev) =>
-      prev.map((d) =>
-        d.id === id
-          ? {
-              ...d,
-              completed: !d.completed,
-              accepted: !d.completed ? true : d.accepted,
-            }
-          : d
+    setOrders((prev) =>
+      prev.map((o) =>
+        o.id === id
+          ? { ...o, status: o.status === "completed" ? "assigned" : "completed" }
+          : o
       )
     );
   };
 
-  const total = deliveries.length;
-  const completedCount = deliveries.filter((d) => d.completed).length;
-  const pendingCount = deliveries.filter(
-    (d) => !d.completed && d.accepted
-  ).length;
-  const availableCount = deliveries.filter((d) => !d.accepted).length;
-  const progress = total === 0 ? 0 : (completedCount / total) * 100;
+  // Only show orders assigned to this driver
+  const assignedOrders = orders.filter((o) => o.assignedDriver === name);
 
-  const filteredDeliveries = deliveries.filter((d) => {
+  // Stats
+  const stats = useMemo(() => {
+    const total = assignedOrders.length;
+    const completed = assignedOrders.filter((o) => o.status === "completed").length;
+    const pending = assignedOrders.filter((o) => o.status === "assigned").length;
+    const available = assignedOrders.filter((o) => o.status === "pending").length;
+    return {
+      total,
+      completed,
+      pending,
+      available,
+      progress: total ? (completed / total) * 100 : 0,
+    };
+  }, [assignedOrders]);
+
+  const filteredOrders = assignedOrders.filter((o) => {
     if (filter === "all") return true;
-    if (filter === "pending") return !d.completed;
-    return d.completed;
+    if (filter === "pending") return o.status !== "completed";
+    return o.status === "completed";
   });
 
   return (
@@ -117,25 +88,17 @@ const DriverDashboard: React.FC = () => {
 
       {/* Stats */}
       <div className="statsContainer">
-        <div className="statsCard">
-          Total: <strong>{total}</strong>
-        </div>
-        <div className="statsCard">
-          Pending: <strong>{pendingCount}</strong>
-        </div>
-        <div className="statsCard">
-          Available: <strong>{availableCount}</strong>
-        </div>
-        <div className="statsCard">
-          Completed: <strong>{completedCount}</strong>
-        </div>
+        <div className="statsCard">Total: <strong>{stats.total}</strong></div>
+        <div className="statsCard">Pending: <strong>{stats.pending}</strong></div>
+        <div className="statsCard">Available: <strong>{stats.available}</strong></div>
+        <div className="statsCard">Completed: <strong>{stats.completed}</strong></div>
       </div>
 
       {/* Progress */}
       <div className="progressContainer">
         <div className="progressBar">
-          <div className="progressFill" style={{ width: `${progress}%` }}>
-            {progress.toFixed(0)}%
+          <div className="progressFill" style={{ width: `${stats.progress}%` }}>
+            {stats.progress.toFixed(0)}%
           </div>
         </div>
       </div>
@@ -155,52 +118,51 @@ const DriverDashboard: React.FC = () => {
 
       {/* Delivery Grid */}
       <div className="deliveryGrid">
-        {filteredDeliveries.length > 0 ? (
-          filteredDeliveries.map((d) => (
-            <div
-              key={d.id}
-              className={`deliveryCard ${d.completed ? "completed" : d.accepted ? "inProgress" : "pending"}`}
-            >
-              <div className="deliveryHeader">
-                <h3>{d.customer}</h3>
-                <span className="reward">💰 ${d.reward}</span>
+        {filteredOrders.length > 0 ? (
+          filteredOrders.map((o) => {
+            const remainingTime =
+              o.status === "assigned" && o.acceptedAt
+                ? Math.max(30 - Math.floor((currentTime - o.acceptedAt) / 60000), 0)
+                : null;
+
+            return (
+              <div
+                key={o.id}
+                className={`deliveryCard ${
+                  o.status === "completed"
+                    ? "completed"
+                    : o.status === "assigned"
+                    ? "inProgress"
+                    : "pending"
+                }`}
+              >
+                <div className="deliveryHeader">
+                  <h3>{o.customer}</h3>
+                  <span className="reward">💰 ${o.reward}</span>
+                </div>
+                <p className="route">
+                  <strong>City:</strong> {o.city} <br />
+                  <strong>Address:</strong> {o.address}
+                </p>
+                <p className="items">
+                  <strong>Items:</strong> {o.items.join(", ")}
+                </p>
+                {remainingTime !== null && (
+                  <p className="eta">⏱ ETA: {remainingTime} min</p>
+                )}
+                <div className="cardButtons">
+                  {o.status === "assigned" && (
+                    <button onClick={() => toggleComplete(o.id)}>Mark Completed</button>
+                  )}
+                  {o.status === "completed" && (
+                    <button onClick={() => toggleComplete(o.id)}>Undo Complete</button>
+                  )}
+                </div>
               </div>
-
-              <p className="route">
-                <strong>Pickup:</strong> {d.pickup}
-                <br />
-                <strong>Dropoff:</strong> {d.dropoff}
-              </p>
-
-              <p className="items">
-                <strong>Items:</strong> {d.items.join(", ")}
-              </p>
-
-              {/* ETA */}
-              {d.accepted && !d.completed && d.eta && (
-                <p className="eta">⏱ ETA: {d.eta} min</p>
-              )}
-
-              {/* Buttons */}
-              {!d.accepted && !d.completed && (
-                <button className="acceptBtn" onClick={() => acceptJob(d.id)}>
-                  Accept Job
-                </button>
-              )}
-              {d.accepted && !d.completed && (
-                <button onClick={() => toggleComplete(d.id)}>
-                  Mark Completed
-                </button>
-              )}
-              {d.completed && (
-                <button onClick={() => toggleComplete(d.id)}>
-                  Undo Complete
-                </button>
-              )}
-            </div>
-          ))
+            );
+          })
         ) : (
-          <p className="noDeliveries">No deliveries found.</p>
+          <p className="noDeliveries">No deliveries assigned yet.</p>
         )}
       </div>
     </div>

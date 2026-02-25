@@ -1,19 +1,33 @@
+/* Full page wrapper */
 .driverDashboardFull {
   height: 100vh;
   width: 100vw;
   background: #0a0f1b;
   color: #e2e8f0;
-  padding: 20px 40px;
+  padding: 20px;
   display: flex;
   flex-direction: column;
   overflow-y: auto;
-  box-sizing: border-box;
   font-family: Arial, sans-serif;
+  box-sizing: border-box;
 }
 
+/* Centered card wrapper like App */
+.driverCard {
+  background: rgba(20, 28, 48, 0.95);
+  padding: 30px 40px;
+  margin: 20px auto;
+  border-radius: 20px;
+  max-width: 1000px;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Header section */
 .driverHeader {
   text-align: center;
-  margin-bottom: 30px;
 }
 
 .driverHeader h1 {
@@ -26,25 +40,35 @@
   color: #94a3b8;
 }
 
+/* Driver info line */
+.driverInfo {
+  text-align: center;
+  font-size: 1rem;
+  color: #cbd5e1;
+  margin-bottom: 20px;
+}
+
+/* Stats cards */
 .statsContainer {
   display: flex;
   justify-content: center;
   gap: 20px;
-  margin-bottom: 20px;
   flex-wrap: wrap;
+  margin-bottom: 25px;
 }
 
 .statsCard {
-  background: rgba(20, 28, 48, 0.95);
+  background: rgba(30, 41, 59, 0.95);
   padding: 20px 25px;
   border-radius: 15px;
   font-size: 1.1rem;
   font-weight: 600;
-  min-width: 150px;
+  min-width: 140px;
   text-align: center;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
 }
 
+/* Progress bar */
 .progressContainer {
   width: 100%;
   max-width: 800px;
@@ -70,6 +94,7 @@
   color: white;
 }
 
+/* Filter buttons */
 .filterButtons {
   display: flex;
   justify-content: center;
@@ -96,6 +121,7 @@
   transform: translateY(-2px);
 }
 
+/* Delivery cards */
 .deliveryGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -104,21 +130,19 @@
 }
 
 .deliveryCard {
-  background: rgba(20, 28, 48, 0.95);
+  background: rgba(30, 41, 59, 0.95);
   padding: 20px;
   border-radius: 15px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
   display: flex;
   flex-direction: column;
   gap: 10px;
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .deliveryCard:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.6);
 }
 
 .deliveryCard.completed {
@@ -127,6 +151,10 @@
 
 .deliveryCard.pending {
   border-left: 6px solid #ff4d6d;
+}
+
+.deliveryCard.inProgress {
+  border-left: 6px solid #ffd166;
 }
 
 .deliveryCard .deliveryHeader {
@@ -144,6 +172,13 @@
   font-size: 0.9rem;
 }
 
+.deliveryCard .route,
+.deliveryCard .items,
+.deliveryCard .eta {
+  font-size: 0.95rem;
+  color: #cbd5e1;
+}
+
 .deliveryCard button {
   padding: 10px 0;
   border-radius: 12px;
@@ -157,12 +192,6 @@
 
 .deliveryCard button:hover {
   background: #ff9f1c;
-}
-
-.deliveryCard .route,
-.deliveryCard .items {
-  font-size: 0.95rem;
-  color: #cbd5e1;
 }
 
 .noDeliveries {

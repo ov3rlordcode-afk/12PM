@@ -3,11 +3,12 @@ import "./App.css";
 import Header from "./Header";
 import UserHome from "./home/UserHome";
 import DriverDashboard from "./user/drivers/Driver";
+import OperatorDashboard from "./user/operator/operator";
 import DriverSteps from "./steps/driverssteps";
 import UserSteps from "./steps/usersteps";
 
-type Role = "Customer" | "Driver" | "";
-type Step = 1 | 2 | 3 | 4;
+type Role = "Customer" | "Driver" | "Operator" | "";
+type Step = 1 | 2 | 3 | 4 | 5 | 6 | 7; // <-- added new steps
 
 interface StoredUser {
   email: string;
@@ -54,6 +55,7 @@ export default function App() {
 
   const isCustomer = role === "Customer";
   const isDriver = role === "Driver";
+  const isOperator = role === "Operator";
 
   /* Restore session */
   useEffect(() => {
@@ -149,8 +151,11 @@ export default function App() {
 
     if (!role) return alert("Select a role");
 
-    if (isDriver && !/^(?=.*[A-Z])(?=.*\d).{8,}$/.test(password)) {
-      return alert("UK password must be 8+ chars, include uppercase & number");
+    if (
+      (isDriver || isOperator) &&
+      !/^(?=.*[A-Z])(?=.*\d).{8,}$/.test(password)
+    ) {
+      return alert("Password must be 8+ chars, include uppercase & number");
     }
 
     setStep(2);
@@ -172,6 +177,7 @@ export default function App() {
       if (!licensePhoto) return alert("Upload photo of driving license");
     }
 
+    // Operator doesn't need extra info, skip
     setStep(4);
   };
 
@@ -207,7 +213,6 @@ export default function App() {
           {isCustomer && (
             <UserHome name={email} city={city} address={address} />
           )}
-
           {isDriver && (
             <DriverDashboard
               name={email}
@@ -216,6 +221,7 @@ export default function App() {
               vehicleInfo={vehicleInfo}
             />
           )}
+          {isOperator && <OperatorDashboard />}
         </div>
 
         <button className="logoutBtn" onClick={handleLogout}>
@@ -237,7 +243,7 @@ export default function App() {
     );
   }
 
-  /* Step 1 (Header moved to separate component) */
+  /* Step 1 (Header) */
   if (step === 1) {
     return renderCard(
       <Header
@@ -254,8 +260,8 @@ export default function App() {
     );
   }
 
-  /* Step 2 & 3 */
-  if ((step === 2 || step === 3) && isCustomer) {
+  /* Steps 2–6 for Customers */
+  if (isCustomer && step >= 2 && step <= 6) {
     return renderCard(
       <UserSteps
         step={step}
@@ -266,12 +272,15 @@ export default function App() {
         setAddress={setAddress}
         validateStep2={validateStep2}
         validateStep3={validateStep3}
+        validateStep4={() => setStep(5)}
+        validateStep5={() => setStep(6)}
         SCOTLAND_CITIES={SCOTLAND_CITIES}
       />
     );
   }
 
-  if ((step === 2 || step === 3) && isDriver) {
+  /* Steps 2–3 for Drivers or Operators */
+  if ((isDriver || isOperator) && (step === 2 || step === 3)) {
     return renderCard(
       <DriverSteps
         step={step}
@@ -290,8 +299,8 @@ export default function App() {
     );
   }
 
-  /* Step 4 */
-  if (step === 4) {
+  /* Step 7: Terms for everyone */
+  if (step === 7) {
     return renderCard(
       <>
         <h1 className="termsTitle">Terms of Service</h1>
@@ -313,7 +322,7 @@ export default function App() {
         </label>
 
         <div className="btnRow">
-          <button onClick={() => setStep(3)}>Back</button>
+          <button onClick={() => setStep(6)}>Back</button>
           <button disabled={!agreed} onClick={completeSignup}>
             Accept & Continue
           </button>

@@ -1,0 +1,115 @@
+.cityGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 20px;
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+.cityCard {
+  position: relative;
+  height: 70px;
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  background-size: cover;
+  background-position: center;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease,
+    border 0.3s ease;
+}
+
+.cityCard:hover,
+.cityCard.focused {
+  transform: scale(1.05);
+  box-shadow: 0 10px 25px rgba(255, 77, 109, 0.6);
+}
+
+.cityCard.selected {
+  border: 4px solid #ff4d6d;
+  box-shadow: 0 10px 30px rgba(255, 77, 109, 0.7);
+}
+
+.cityOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  transition: background 0.3s ease;
+  padding: 10px;
+}
+
+.cityCard:hover .cityOverlay {
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.cityName {
+  color: #fff;
+  font-weight: bold;
+}
+
+.cityDesc {
+  color: #f0f0f0;
+  font-size: 0.75rem;
+}
+
+.selectedTag {
+  position: absolute;
+  bottom: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #ff4d6d;
+  color: #fff;
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: bold;
+}
+
+.stepCard {
+  background: linear-gradient(135deg, #1e293b, #475569);
+  color: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.stepCard:hover {
+  transform: scale(1.03);
+  box-shadow: 0 10px 30px rgba(255, 77, 109, 0.5);
+}
+
+.btnRow {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+
+.btnRow button {
+  flex: 1 1 45%;
+  padding: 10px 16px;
+  margin: 5px;
+  border-radius: 8px;
+  background-color: #ff4d6d;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+
+@media (max-width: 600px) {
+  .cityGrid {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  }
+  .btnRow button {
+    flex: 1 1 100%;
+  }
+}

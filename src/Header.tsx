@@ -1,6 +1,6 @@
 import React from "react";
 
-type Role = "Customer" | "Driver" | "";
+type Role = "Customer" | "Driver" | "Operator" | "";
 
 interface HeaderProps {
   email: string;
@@ -44,9 +44,10 @@ export default function Header({
         onChange={(e) => setPassword(e.target.value)}
       />
 
+      {/* Role selection only on signup */}
       {!isLoginMode && (
         <div className="roleSelection">
-          {(["Customer", "Driver"] as Role[]).map((r) => (
+          {(["Customer", "Driver", "Operator"] as Role[]).map((r) => (
             <label key={r}>
               <input
                 type="radio"
