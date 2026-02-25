@@ -22,6 +22,7 @@ export default function UserHome({ name, city, onLogout }: Props) {
   const [cart, setCart] = useState<Item[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   /* ================= FILTERED DATA ================= */
 
@@ -46,11 +47,14 @@ export default function UserHome({ name, city, onLogout }: Props) {
   const brandLocations = useMemo(() => {
     if (!selectedBrand) return [];
 
-    const unique = new Map();
+    const unique = new Map<string, Item>();
+
     filteredItems
       .filter((item) => item.brand === selectedBrand)
       .forEach((item) => {
-        if (!unique.has(item.shop)) unique.set(item.shop, item);
+        if (!unique.has(item.shop)) {
+          unique.set(item.shop, item);
+        }
       });
 
     return Array.from(unique.values());
@@ -70,15 +74,16 @@ export default function UserHome({ name, city, onLogout }: Props) {
     [cart]
   );
 
-  /* ================= CART ================= */
+  /* ================= CART ACTIONS ================= */
 
   const addToCart = (item: Item) => {
     setCart((prev) => [...prev, item]);
     setCartOpen(true);
   };
 
-  const removeFromCart = (index: number) =>
+  const removeFromCart = (index: number) => {
     setCart((prev) => prev.filter((_, i) => i !== index));
+  };
 
   const placeOrder = () => {
     if (!cart.length) return;
@@ -109,67 +114,140 @@ export default function UserHome({ name, city, onLogout }: Props) {
     setSelectedShop(null);
   };
 
+  /* ================= RENDER ================= */
+
   return (
     <div className="userHome app">
       {/* ================= NAVBAR ================= */}
       <nav className="homeNavbar">
-        <h2 className="logo" onClick={goHome}>
-          Swift2Me
-        </h2>
+        <div className="navLeft">
+          <h2 className="logo" onClick={goHome}>
+            Swift2Me
+          </h2>
 
-        <input
-          type="text"
-          placeholder="Search stores, brands or items..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="searchInput"
-        />
+          <ul className="navMenu">
+            <li onClick={goHome}>Home</li>
 
-        <div className="navActions">
+            <li
+              onClick={() => {
+                setSelectedBrand(null);
+                setSelectedShop(null);
+              }}
+            >
+              Brands
+            </li>
+
+            <li
+              className="navItem"
+              onMouseEnter={() => setDropdownOpen(true)}
+              onMouseLeave={() => setDropdownOpen(false)}
+            >
+              Orders
+              {dropdownOpen && (
+                <div className="dropdownMenu">
+                  <div className="dropdownItem">Pending Orders</div>
+                  <div className="dropdownItem">Completed Orders</div>
+                  <div className="dropdownItem">Cancelled Orders</div>
+                </div>
+              )}
+            </li>
+
+            <li onClick={() => alert("Profile page coming soon!")}>Profile</li>
+          </ul>
+        </div>
+
+        <div className="navRight">
+          <input
+            type="text"
+            placeholder="Search stores, brands or items..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="searchInput"
+          />
+
           <button className="cartIcon" onClick={() => setCartOpen(true)}>
             🛒 {cart.length}
           </button>
+
           <AvatarDropdown onLogout={onLogout} />
         </div>
       </nav>
 
-      {/* ================= BRAND VIEW ================= */}
+      {/* ================= BRAND GRID ================= */}
       {!selectedBrand && !selectedShop && (
         <div className="itemsGrid">
-          {Object.entries(brands).map(([brandName, items]) => (
-            <BrandCard
-              key={brandName}
-              brandName={brandName}
-              items={items}
-              onViewBrand={() => setSelectedBrand(brandName)}
-            />
-          ))}
+          {Object.entries(brands).length ? (
+            Object.entries(brands).map(([brandName, items]) => (
+              <BrandCard
+                key={brandName}
+                brandName={brandName}
+                items={items}
+                onViewBrand={() => setSelectedBrand(brandName)}
+              />
+            ))
+          ) : (
+            <p className="noResults">No brands found.</p>
+          )}
         </div>
       )}
 
-      {/* ================= LOCATION VIEW ================= */}
+      {/* ================= LOCATIONS VIEW ================= */}
       {selectedBrand && !selectedShop && (
-        <div className="itemsGrid">
-          {brandLocations.map((shop) => (
-            <LocationCard
-              key={shop.shop}
-              shopName={shop.shop}
-              shopImage={shop.shopImage}
-              openHours={shop.openHours}
-              address={shop.address}
-              website={shop.website}
-              onSelectShop={() => setSelectedShop(shop.shop)}
-            />
-          ))}
-        </div>
+        <>
+          <div className="brandHeader">
+            <h2>{selectedBrand} Locations</h2>
+            <button className="backBtn" onClick={goHome}>
+              ← Back
+            </button>
+          </div>
+
+          <div className="itemsGrid">
+            {brandLocations.map((shop) => (
+              <LocationCard
+                key={shop.shop}
+                shopName={shop.shop}
+                shopImage={shop.shopImage}
+                openHours={shop.openHours}
+                address={shop.address}
+                website={shop.website}
+                onSelectShop={() => {
+                  setSelectedShop(shop.shop);
+                  setShopCategory("All");
+                }}
+              />
+            ))}
+          </div>
+        </>
       )}
 
       {/* ================= SHOP MENU ================= */}
       {selectedShop && (
-        <div className="itemsGrid">
-          {shopItems.map((item) => (
-            <ItemCard key={item.id} item={item} onAddToCart={addToCart} />
-          ))}
+        <div className="shopMenu">
+          <div className="shopHeader">
+            <h3>{selectedShop} Menu</h3>
+            <button onClick={() => setSelectedShop(null)}>← Back</button>
+          </div>
+
+          <div className="categories">
+            {categories.map((cat) => (
+              <CategoryButton
+                key={cat}
+                category={cat}
+                isActive={shopCategory === cat}
+                onClick={() => setShopCategory(cat)}
+              />
+            ))}
+          </div>
+
+          <div className="itemsGrid">
+            {shopItems.length ? (
+              shopItems.map((item) => (
+                <ItemCard key={item.id} item={item} onAddToCart={addToCart} />
+              ))
+            ) : (
+              <p className="noResults">No items available.</p>
+            )}
+          </div>
         </div>
       )}
 
@@ -181,13 +259,17 @@ export default function UserHome({ name, city, onLogout }: Props) {
         </div>
 
         <div className="cartContent">
-          {cart.map((item, index) => (
-            <div key={index} className="cartItem">
-              <span>{item.name}</span>
-              <span>£{item.price.toFixed(2)}</span>
-              <button onClick={() => removeFromCart(index)}>✕</button>
-            </div>
-          ))}
+          {cart.length ? (
+            cart.map((item, index) => (
+              <div key={index} className="cartItem">
+                <span>{item.name}</span>
+                <span>£{item.price.toFixed(2)}</span>
+                <button onClick={() => removeFromCart(index)}>✕</button>
+              </div>
+            ))
+          ) : (
+            <p>Your cart is empty.</p>
+          )}
         </div>
 
         <div className="cartFooter">
