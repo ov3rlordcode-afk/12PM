@@ -1,0 +1,46 @@
+import React, { useState } from "react";
+import { Item } from "../mockItems";
+import "./ItemCard.css";
+
+type Props = {
+  item: Item;
+  onAddToCart: (item: Item) => void;
+};
+
+export default function ItemCard({ item, onAddToCart }: Props) {
+  const [added, setAdded] = useState(false);
+
+  const handleAddToCart = () => {
+    onAddToCart(item);
+    setAdded(true);
+    setTimeout(() => setAdded(false), 1000); // Smooth feedback
+  };
+
+  return (
+    <div className="itemCard professionalCard">
+      {/* ITEM IMAGE */}
+      <div
+        className="itemImageWrapper"
+        style={{ backgroundImage: `url(${item.image})` }}
+      >
+        <div className="itemOverlay">
+          <p className="shopName">{item.shop}</p>
+        </div>
+      </div>
+
+      {/* ITEM DETAILS */}
+      <div className="itemInfo">
+        <h3 className="itemName">{item.name}</h3>
+        <p className="itemPrice">£{item.price.toFixed(2)}</p>
+
+        {/* ADD TO CART BUTTON */}
+        <button
+          className={`addBtn ${added ? "added" : ""}`}
+          onClick={handleAddToCart}
+        >
+          {added ? "Added!" : "Add to Cart"}
+        </button>
+      </div>
+    </div>
+  );
+}

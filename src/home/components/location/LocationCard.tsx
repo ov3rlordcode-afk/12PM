@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./LocationCard.css";
+import Reviews from "../reviews/Reviews"; // Make sure this path is correct
 
 type OpenHours = Record<string, { open: string; close: string }>;
 
@@ -20,6 +21,7 @@ export default function LocationCard({
   const [isFavorite, setIsFavorite] = useState(false);
   const [likes, setLikes] = useState(0);
   const [dislikes, setDislikes] = useState(0);
+  const [showReviews, setShowReviews] = useState(false); // review modal
 
   const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const now = new Date();
@@ -40,10 +42,36 @@ export default function LocationCard({
     window.open(url, "_blank");
   };
 
-  const toggleFavorite = () => setIsFavorite(!isFavorite);
   const handleLike = () => setLikes((prev) => prev + 1);
   const handleDislike = () => setDislikes((prev) => prev + 1);
-  const handleReview = () => alert("Review feature coming soon!"); // Placeholder
+  const handleReport = () => alert("Report feature coming soon!"); // placeholder
+
+  // ---------- FAVORITES: GLOBAL & PERSISTENT ----------
+  useEffect(() => {
+    const favorites: string[] = JSON.parse(
+      localStorage.getItem("favorites") || "[]"
+    );
+    setIsFavorite(favorites.includes(shopName));
+  }, [shopName]);
+
+  const toggleFavorite = () => {
+    const favorites: string[] = JSON.parse(
+      localStorage.getItem("favorites") || "[]"
+    );
+
+    let updatedFavorites: string[];
+    if (favorites.includes(shopName)) {
+      // Remove from favorites
+      updatedFavorites = favorites.filter((name) => name !== shopName);
+      setIsFavorite(false);
+    } else {
+      // Add to favorites
+      updatedFavorites = [...favorites, shopName];
+      setIsFavorite(true);
+    }
+
+    localStorage.setItem("favorites", JSON.stringify(updatedFavorites));
+  };
 
   return (
     <div className="itemCard modernCard">
@@ -71,7 +99,11 @@ export default function LocationCard({
           <button className="iconBtn" onClick={handleDislike} title="Dislike">
             👎 {dislikes}
           </button>
-          <button className="iconBtn" onClick={handleReview} title="Review">
+          <button
+            className="iconBtn"
+            onClick={() => setShowReviews(true)}
+            title="Review"
+          >
             📝
           </button>
         </div>
@@ -122,8 +154,16 @@ export default function LocationCard({
           <button className="mainBtn mapBtn" onClick={openInMaps}>
             View on Map
           </button>
+          <button className="mainBtn reportBtn" onClick={handleReport}>
+            Report Shop
+          </button>
         </div>
       </div>
+
+      {/* REVIEW MODAL */}
+      {showReviews && (
+        <Reviews shopName={shopName} onClose={() => setShowReviews(false)} />
+      )}
     </div>
   );
 }

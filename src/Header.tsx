@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 
 type Role = "Customer" | "Driver" | "Operator" | "";
 
@@ -25,6 +25,10 @@ export default function Header({
   handleLogin,
   validateStep1,
 }: HeaderProps) {
+  const [isFavorite, setIsFavorite] = useState(false);
+
+  const toggleFavorite = () => setIsFavorite((prev) => !prev);
+
   return (
     <>
       <h1 className="logo">Swift2Me</h1>
@@ -68,6 +72,27 @@ export default function Header({
       >
         {isLoginMode ? "Login" : "Next"}
       </button>
+
+      {/* ---------- FAVORITE TOGGLE ---------- */}
+      {isLoginMode && (
+        <div style={{ marginTop: "15px", textAlign: "center" }}>
+          <button
+            onClick={toggleFavorite}
+            style={{
+              background: isFavorite ? "#ff4d6d" : "#475569",
+              color: "#fff",
+              padding: "8px 16px",
+              borderRadius: "8px",
+              border: "none",
+              cursor: "pointer",
+              fontWeight: "bold",
+              transition: "all 0.2s ease",
+            }}
+          >
+            {isFavorite ? "★ Favorited" : "☆ Add to Favorites"}
+          </button>
+        </div>
+      )}
     </>
   );
 }

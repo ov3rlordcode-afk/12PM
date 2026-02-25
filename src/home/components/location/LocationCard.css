@@ -171,3 +171,12 @@
 .mapBtn:hover {
   background: #00bcd4;
 }
+/* ---------- REPORT BUTTON ---------- */
+.reportBtn {
+  background: #ff4d6d;
+  color: #fff;
+}
+
+.reportBtn:hover {
+  background: #ff3b50;
+}
