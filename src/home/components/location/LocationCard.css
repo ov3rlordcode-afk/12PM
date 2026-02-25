@@ -21,6 +21,7 @@
   height: 180px;
   background-size: cover;
   background-position: center;
+  border-bottom: 1px solid #475569;
 }
 
 /* ---------- TOP OVERLAY (NAME + STATUS) ---------- */
@@ -41,6 +42,7 @@
   font-size: 1.4rem;
   color: #fff;
   font-weight: 700;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.7);
 }
 
 .statusTag {
@@ -53,11 +55,11 @@
 }
 
 .statusTag.open {
-  background-color: green;
+  background-color: #28a745;
 }
 
 .statusTag.closed {
-  background-color: red;
+  background-color: #dc3545;
 }
 
 /* ---------- FLOATING ICON BUTTONS ---------- */
@@ -100,19 +102,42 @@
 }
 
 .todayHours {
-  margin: 5px 0 10px;
+  margin: 5px 0 8px;
+  font-weight: 500;
 }
 
 .openStatus {
-  color: green;
+  color: #28a745;
   font-weight: bold;
   margin-left: 5px;
 }
 
 .closedStatus {
-  color: red;
+  color: #dc3545;
   font-weight: bold;
   margin-left: 5px;
+}
+
+/* ---------- SHOP ADDRESS & WEBSITE ---------- */
+.shopAddress,
+.shopWebsite {
+  margin: 5px 0;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.shopWebsite a {
+  color: #06d6e1;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.shopWebsite a:hover {
+  text-decoration: underline;
+  color: #00bcd4;
 }
 
 /* ---------- WEEKLY HOURS ---------- */
@@ -128,12 +153,12 @@
 }
 
 .todayOpen {
-  color: green;
+  color: #28a745;
   font-weight: bold;
 }
 
 .todayClosed {
-  color: red;
+  color: #dc3545;
   font-weight: bold;
 }
 
@@ -171,7 +196,7 @@
 .mapBtn:hover {
   background: #00bcd4;
 }
-/* ---------- REPORT BUTTON ---------- */
+
 .reportBtn {
   background: #ff4d6d;
   color: #fff;
@@ -179,4 +204,13 @@
 
 .reportBtn:hover {
   background: #ff3b50;
+}
+
+.websiteBtn {
+  background: #28a745;
+  color: #fff;
+}
+
+.websiteBtn:hover {
+  background: #20c058;
 }

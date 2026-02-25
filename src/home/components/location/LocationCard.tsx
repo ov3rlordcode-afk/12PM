@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./LocationCard.css";
-import Reviews from "../reviews/Reviews"; // Make sure this path is correct
+import Reviews from "../reviews/Reviews"; // Ensure correct path
 
 type OpenHours = Record<string, { open: string; close: string }>;
 
@@ -8,6 +8,8 @@ type Props = {
   shopName: string;
   shopImage: string;
   openHours: OpenHours;
+  address: string; // NEW: store address
+  website?: string; // NEW: optional store website
   onSelectShop: () => void;
 };
 
@@ -15,13 +17,15 @@ export default function LocationCard({
   shopName,
   shopImage,
   openHours,
+  address,
+  website,
   onSelectShop,
 }: Props) {
   const [showHours, setShowHours] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
   const [likes, setLikes] = useState(0);
   const [dislikes, setDislikes] = useState(0);
-  const [showReviews, setShowReviews] = useState(false); // review modal
+  const [showReviews, setShowReviews] = useState(false);
 
   const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const now = new Date();
@@ -37,16 +41,16 @@ export default function LocationCard({
     currentTime >= todayHours.open && currentTime <= todayHours.close;
 
   const openInMaps = () => {
-    const query = encodeURIComponent(shopName);
+    const query = encodeURIComponent(`${shopName}, ${address}`);
     const url = `https://www.google.com/maps/search/?api=1&query=${query}`;
     window.open(url, "_blank");
   };
 
   const handleLike = () => setLikes((prev) => prev + 1);
   const handleDislike = () => setDislikes((prev) => prev + 1);
-  const handleReport = () => alert("Report feature coming soon!"); // placeholder
+  const handleReport = () => alert("Report feature coming soon!");
 
-  // ---------- FAVORITES: GLOBAL & PERSISTENT ----------
+  // ---------- FAVORITES: LOCALSTORAGE ----------
   useEffect(() => {
     const favorites: string[] = JSON.parse(
       localStorage.getItem("favorites") || "[]"
@@ -61,11 +65,9 @@ export default function LocationCard({
 
     let updatedFavorites: string[];
     if (favorites.includes(shopName)) {
-      // Remove from favorites
       updatedFavorites = favorites.filter((name) => name !== shopName);
       setIsFavorite(false);
     } else {
-      // Add to favorites
       updatedFavorites = [...favorites, shopName];
       setIsFavorite(true);
     }
@@ -82,7 +84,9 @@ export default function LocationCard({
       >
         <div className="overlayTop">
           <h3>{shopName}</h3>
-          <div className="statusTag">{isOpen ? "Open" : "Closed"}</div>
+          <div className={`statusTag ${isOpen ? "open" : "closed"}`}>
+            {isOpen ? "Open" : "Closed"}
+          </div>
         </div>
 
         <div className="floatingButtons">
@@ -111,6 +115,7 @@ export default function LocationCard({
 
       {/* DESCRIPTION & ACTIONS */}
       <div className="itemInfo">
+        {/* Today hours */}
         <p className="todayHours">
           Today: {todayHours.open} - {todayHours.close}{" "}
           <span className={isOpen ? "openStatus" : "closedStatus"}>
@@ -118,6 +123,20 @@ export default function LocationCard({
           </span>
         </p>
 
+        {/* Address */}
+        <p className="shopAddress">📍 {address}</p>
+
+        {/* Website */}
+        {website && (
+          <p className="shopWebsite">
+            🔗{" "}
+            <a href={website} target="_blank" rel="noopener noreferrer">
+              Visit Website
+            </a>
+          </p>
+        )}
+
+        {/* Weekly hours */}
         {showHours && (
           <div className="weeklyHours">
             {days.map((dayName) => {
@@ -141,6 +160,7 @@ export default function LocationCard({
           </div>
         )}
 
+        {/* Buttons */}
         <div className="btnRow">
           <button
             className="mainBtn"
@@ -154,6 +174,14 @@ export default function LocationCard({
           <button className="mainBtn mapBtn" onClick={openInMaps}>
             View on Map
           </button>
+          {website && (
+            <button
+              className="mainBtn websiteBtn"
+              onClick={() => window.open(website, "_blank")}
+            >
+              Website
+            </button>
+          )}
           <button className="mainBtn reportBtn" onClick={handleReport}>
             Report Shop
           </button>
