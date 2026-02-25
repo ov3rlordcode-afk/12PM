@@ -6,6 +6,7 @@ import LocationCard from "./components/location/LocationCard";
 import ItemCard from "./components/ItemCard";
 import AvatarDropdown from "./components/AvatarDropdown";
 import CategoryButton from "./components/CategoryButton";
+import Cart from "./components/cart/Cart";
 
 type Props = {
   name: string;
@@ -19,10 +20,12 @@ export default function UserHome({ name, city, onLogout }: Props) {
   const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
   const [selectedShop, setSelectedShop] = useState<string | null>(null);
   const [shopCategory, setShopCategory] = useState("All");
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  /* ================= CART STATE ================= */
   const [cart, setCart] = useState<Item[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(false);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   /* ================= FILTERED DATA ================= */
 
@@ -46,7 +49,6 @@ export default function UserHome({ name, city, onLogout }: Props) {
 
   const brandLocations = useMemo(() => {
     if (!selectedBrand) return [];
-
     const unique = new Map<string, Item>();
 
     filteredItems
@@ -107,8 +109,6 @@ export default function UserHome({ name, city, onLogout }: Props) {
     setOrderSuccess(true);
   };
 
-  /* ================= NAVIGATION ================= */
-
   const goHome = () => {
     setSelectedBrand(null);
     setSelectedShop(null);
@@ -118,7 +118,6 @@ export default function UserHome({ name, city, onLogout }: Props) {
 
   return (
     <div className="userHome app">
-      {/* ================= NAVBAR ================= */}
       <nav className="homeNavbar">
         <div className="navLeft">
           <h2 className="logo" onClick={goHome}>
@@ -165,15 +164,21 @@ export default function UserHome({ name, city, onLogout }: Props) {
             className="searchInput"
           />
 
-          <button className="cartIcon" onClick={() => setCartOpen(true)}>
-            🛒 {cart.length}
-          </button>
+          <Cart
+            cart={cart}
+            cartOpen={cartOpen}
+            setCartOpen={setCartOpen}
+            removeFromCart={removeFromCart}
+            placeOrder={placeOrder}
+            totalPrice={totalPrice}
+            orderSuccess={orderSuccess}
+            setOrderSuccess={setOrderSuccess}
+          />
 
           <AvatarDropdown onLogout={onLogout} />
         </div>
       </nav>
 
-      {/* ================= BRAND GRID ================= */}
       {!selectedBrand && !selectedShop && (
         <div className="itemsGrid">
           {Object.entries(brands).length ? (
@@ -191,7 +196,6 @@ export default function UserHome({ name, city, onLogout }: Props) {
         </div>
       )}
 
-      {/* ================= LOCATIONS VIEW ================= */}
       {selectedBrand && !selectedShop && (
         <>
           <div className="brandHeader">
@@ -220,7 +224,6 @@ export default function UserHome({ name, city, onLogout }: Props) {
         </>
       )}
 
-      {/* ================= SHOP MENU ================= */}
       {selectedShop && (
         <div className="shopMenu">
           <div className="shopHeader">
@@ -247,46 +250,6 @@ export default function UserHome({ name, city, onLogout }: Props) {
             ) : (
               <p className="noResults">No items available.</p>
             )}
-          </div>
-        </div>
-      )}
-
-      {/* ================= CART DRAWER ================= */}
-      <div className={`cartDrawer ${cartOpen ? "open" : ""}`}>
-        <div className="cartHeader">
-          <h3>Your Cart</h3>
-          <button onClick={() => setCartOpen(false)}>✕</button>
-        </div>
-
-        <div className="cartContent">
-          {cart.length ? (
-            cart.map((item, index) => (
-              <div key={index} className="cartItem">
-                <span>{item.name}</span>
-                <span>£{item.price.toFixed(2)}</span>
-                <button onClick={() => removeFromCart(index)}>✕</button>
-              </div>
-            ))
-          ) : (
-            <p>Your cart is empty.</p>
-          )}
-        </div>
-
-        <div className="cartFooter">
-          <strong>Total: £{totalPrice.toFixed(2)}</strong>
-          <button className="checkoutBtn" onClick={placeOrder}>
-            Place Order
-          </button>
-        </div>
-      </div>
-
-      {/* ================= SUCCESS MODAL ================= */}
-      {orderSuccess && (
-        <div className="modalOverlay">
-          <div className="successModal">
-            <h2>🎉 Order Confirmed!</h2>
-            <p>Your order has been placed successfully.</p>
-            <button onClick={() => setOrderSuccess(false)}>Close</button>
           </div>
         </div>
       )}
