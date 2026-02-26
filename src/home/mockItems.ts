@@ -5,7 +5,7 @@ export type Item = {
   image: string;
   shop: string;
   brand: string;
-  type: string; // this will be used for categories
+  type: string; // category
   shopImage: string;
   openHours: Record<string, { open: string; close: string }>;
 };
@@ -13,7 +13,7 @@ export type Item = {
 // --- Mock Items ---
 export const mockItems: Item[] = [
   {
-    id: 3,
+    id: 1,
     name: "Bread",
     price: 1.0,
     image: "/images/bread.jpg",
@@ -33,12 +33,32 @@ export const mockItems: Item[] = [
     },
   },
   {
-    id: 3,
-    name: "Bread",
-    price: 1.0,
-    image: "/images/bread.jpg",
-    shop: "Asda Straiton Superstore",
+    id: 2,
+    name: "Milk",
+    price: 1.5,
+    image: "/images/milk.jpg",
+    shop: "Tescos Central",
     brand: "Tescos",
+    type: "Grocery",
+    shopImage:
+      "https://static.where-e.com/United_Kingdom/Tescos-Central_12345.jpg",
+    openHours: {
+      Mon: { open: "06:00", close: "22:00" },
+      Tue: { open: "06:00", close: "22:00" },
+      Wed: { open: "06:00", close: "22:00" },
+      Thu: { open: "06:00", close: "22:00" },
+      Fri: { open: "06:00", close: "22:00" },
+      Sat: { open: "06:00", close: "22:00" },
+      Sun: { open: "07:00", close: "20:00" },
+    },
+  },
+  {
+    id: 3,
+    name: "Eggs",
+    price: 2.5,
+    image: "/images/eggs.jpg",
+    shop: "Asda Straiton Superstore",
+    brand: "Asda",
     type: "Grocery",
     shopImage:
       "https://static.where-e.com/United_Kingdom/Asda-Straiton-Superstore_0c7dbd6b34741eaee989aa4992a9f6d5.jpg",
@@ -52,7 +72,26 @@ export const mockItems: Item[] = [
       Sun: { open: "08:00", close: "20:00" },
     },
   },
-  // Add more items here...
+  {
+    id: 4,
+    name: "Cheese",
+    price: 3.0,
+    image: "/images/cheese.jpg",
+    shop: "Tescos Central",
+    brand: "Tescos",
+    type: "Dairy",
+    shopImage:
+      "https://static.where-e.com/United_Kingdom/Tescos-Central_12345.jpg",
+    openHours: {
+      Mon: { open: "06:00", close: "22:00" },
+      Tue: { open: "06:00", close: "22:00" },
+      Wed: { open: "06:00", close: "22:00" },
+      Thu: { open: "06:00", close: "22:00" },
+      Fri: { open: "06:00", close: "22:00" },
+      Sat: { open: "06:00", close: "22:00" },
+      Sun: { open: "07:00", close: "20:00" },
+    },
+  },
 ];
 
 // --- Generate Categories dynamically from items ---

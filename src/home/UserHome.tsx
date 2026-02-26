@@ -15,20 +15,17 @@ type Props = {
 };
 
 export default function UserHome({ name, city, onLogout }: Props) {
-  /* ================= STATE ================= */
   const [search, setSearch] = useState("");
   const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
   const [selectedShop, setSelectedShop] = useState<string | null>(null);
   const [shopCategory, setShopCategory] = useState("All");
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
-  /* ================= CART STATE ================= */
   const [cart, setCart] = useState<Item[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(false);
 
   /* ================= FILTERED DATA ================= */
-
   const filteredItems = useMemo(() => {
     return mockItems.filter((item) =>
       [item.name, item.shop, item.brand]
@@ -38,6 +35,7 @@ export default function UserHome({ name, city, onLogout }: Props) {
     );
   }, [search]);
 
+  // GROUP BY BRAND
   const brands = useMemo(() => {
     const grouped: Record<string, Item[]> = {};
     filteredItems.forEach((item) => {
@@ -47,21 +45,19 @@ export default function UserHome({ name, city, onLogout }: Props) {
     return grouped;
   }, [filteredItems]);
 
+  // GET UNIQUE SHOPS FOR SELECTED BRAND
   const brandLocations = useMemo(() => {
     if (!selectedBrand) return [];
     const unique = new Map<string, Item>();
-
     filteredItems
       .filter((item) => item.brand === selectedBrand)
       .forEach((item) => {
-        if (!unique.has(item.shop)) {
-          unique.set(item.shop, item);
-        }
+        if (!unique.has(item.shop)) unique.set(item.shop, item);
       });
-
     return Array.from(unique.values());
   }, [selectedBrand, filteredItems]);
 
+  // GET ITEMS FOR SELECTED SHOP
   const shopItems = useMemo(() => {
     if (!selectedShop) return [];
     return filteredItems.filter(
@@ -77,7 +73,6 @@ export default function UserHome({ name, city, onLogout }: Props) {
   );
 
   /* ================= CART ACTIONS ================= */
-
   const addToCart = (item: Item) => {
     setCart((prev) => [...prev, item]);
     setCartOpen(true);
@@ -89,9 +84,7 @@ export default function UserHome({ name, city, onLogout }: Props) {
 
   const placeOrder = () => {
     if (!cart.length) return;
-
     const orders = JSON.parse(localStorage.getItem("orders") || "[]");
-
     const newOrder = {
       id: Date.now(),
       customer: name,
@@ -101,43 +94,46 @@ export default function UserHome({ name, city, onLogout }: Props) {
       status: "pending",
       createdAt: new Date().toISOString(),
     };
-
     localStorage.setItem("orders", JSON.stringify([...orders, newOrder]));
-
     setCart([]);
     setCartOpen(false);
     setOrderSuccess(true);
   };
 
+  /* ================= NAVIGATION ================= */
   const goHome = () => {
     setSelectedBrand(null);
     setSelectedShop(null);
+    setShopCategory("All");
+    setSearch("");
+  };
+
+  const selectBrand = (brand: string) => {
+    setSelectedBrand(brand);
+    setSelectedShop(null);
+    setShopCategory("All");
+    setSearch("");
+  };
+
+  const selectShop = (shop: string) => {
+    setSelectedShop(shop);
+    setShopCategory("All");
+    setSearch("");
   };
 
   /* ================= RENDER ================= */
-
   return (
     <div className="userHome">
       <div className="boxedContainer">
-        {/* ================= NAVBAR ================= */}
+        {/* NAVBAR */}
         <nav className="homeNavbar">
           <div className="navLeft">
             <h2 className="logo" onClick={goHome}>
               Swift2Me
             </h2>
-
             <ul className="navMenu">
               <li onClick={goHome}>Home</li>
-
-              <li
-                onClick={() => {
-                  setSelectedBrand(null);
-                  setSelectedShop(null);
-                }}
-              >
-                Brands
-              </li>
-
+              <li onClick={() => selectBrand("")}>Brands</li>
               <li
                 className="navItem"
                 onMouseEnter={() => setDropdownOpen(true)}
@@ -152,7 +148,6 @@ export default function UserHome({ name, city, onLogout }: Props) {
                   </div>
                 )}
               </li>
-
               <li onClick={() => alert("Profile page coming soon!")}>
                 Profile
               </li>
@@ -183,8 +178,7 @@ export default function UserHome({ name, city, onLogout }: Props) {
           </div>
         </nav>
 
-        {/* ================= MAIN CONTENT ================= */}
-
+        {/* MAIN CONTENT */}
         {!selectedBrand && !selectedShop && (
           <div className="itemsGrid">
             {Object.entries(brands).length ? (
@@ -193,7 +187,7 @@ export default function UserHome({ name, city, onLogout }: Props) {
                   key={brandName}
                   brandName={brandName}
                   items={items}
-                  onViewBrand={() => setSelectedBrand(brandName)}
+                  onViewBrand={() => selectBrand(brandName)}
                 />
               ))
             ) : (
@@ -212,20 +206,21 @@ export default function UserHome({ name, city, onLogout }: Props) {
             </div>
 
             <div className="itemsGrid">
-              {brandLocations.map((shop) => (
-                <LocationCard
-                  key={shop.shop}
-                  shopName={shop.shop}
-                  shopImage={shop.shopImage}
-                  openHours={shop.openHours}
-                  address={shop.address}
-                  website={shop.website}
-                  onSelectShop={() => {
-                    setSelectedShop(shop.shop);
-                    setShopCategory("All");
-                  }}
-                />
-              ))}
+              {brandLocations.length ? (
+                brandLocations.map((shop) => (
+                  <LocationCard
+                    key={shop.shop}
+                    shopName={shop.shop}
+                    shopImage={shop.shopImage}
+                    openHours={shop.openHours}
+                    address={shop.shop}
+                    website={shop.website}
+                    onSelectShop={() => selectShop(shop.shop)}
+                  />
+                ))
+              ) : (
+                <p className="noResults">No shops found for this brand.</p>
+              )}
             </div>
           </>
         )}
@@ -254,7 +249,9 @@ export default function UserHome({ name, city, onLogout }: Props) {
                   <ItemCard key={item.id} item={item} onAddToCart={addToCart} />
                 ))
               ) : (
-                <p className="noResults">No items available.</p>
+                <p className="noResults">
+                  No items available in this category.
+                </p>
               )}
             </div>
           </div>

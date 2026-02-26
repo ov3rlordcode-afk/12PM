@@ -3,6 +3,12 @@ import { Item } from "../mockItems";
 
 type CartItem = Item & { quantity: number };
 
+type ShopStats = {
+  views: number;
+  likes: number;
+  favorites: number;
+};
+
 type CartContextType = {
   cart: CartItem[];
   addToCart: (item: Item) => void;
@@ -15,16 +21,46 @@ type CartContextType = {
   totalItems: number;
   groupedByShop: Record<
     string,
-    { items: CartItem[]; address: string; subtotal: number }
+    {
+      items: CartItem[];
+      address: string;
+      subtotal: number;
+      deliveryFee: number;
+      grandTotal: number;
+      distanceKm: number;
+      stats: ShopStats;
+    }
   >;
 };
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
+const DELIVERY_FEE_PER_SHOP = 2.99;
+const USER_LOCATION = { lat: 55.9533, lng: -3.1883 }; // Mock user location
+
+const getDistanceKm = (
+  lat1: number,
+  lng1: number,
+  lat2: number,
+  lng2: number
+) => {
+  const R = 6371;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lng2 - lng1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) ** 2;
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+};
+
 export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
 
+  /* ================= ADD / REMOVE ITEMS ================= */
   const addToCart = (item: Item) => {
     setCart((prev) => {
       const existing = prev.find(
@@ -70,18 +106,41 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     );
   };
 
+  /* ================= GROUP BY SHOP ================= */
   const groupedByShop = useMemo(() => {
-    const grouped: Record<
-      string,
-      { items: CartItem[]; address: string; subtotal: number }
-    > = {};
+    const grouped: CartContextType["groupedByShop"] = {};
+
     cart.forEach((item) => {
       if (!grouped[item.shop]) {
-        grouped[item.shop] = { items: [], address: item.address, subtotal: 0 };
+        const lat = item.lat ?? USER_LOCATION.lat + Math.random() * 0.05;
+        const lng = item.lng ?? USER_LOCATION.lng + Math.random() * 0.05;
+
+        // Load shop stats from localStorage
+        const stats: ShopStats = JSON.parse(
+          localStorage.getItem("shopStats") || "{}"
+        )[item.shop] || { views: 0, likes: 0, favorites: 0 };
+
+        grouped[item.shop] = {
+          items: [],
+          address: item.shop,
+          subtotal: 0,
+          deliveryFee: DELIVERY_FEE_PER_SHOP,
+          grandTotal: 0,
+          distanceKm: getDistanceKm(
+            USER_LOCATION.lat,
+            USER_LOCATION.lng,
+            lat,
+            lng
+          ),
+          stats,
+        };
       }
       grouped[item.shop].items.push(item);
       grouped[item.shop].subtotal += item.price * item.quantity;
+      grouped[item.shop].grandTotal =
+        grouped[item.shop].subtotal + grouped[item.shop].deliveryFee;
     });
+
     return grouped;
   }, [cart]);
 
