@@ -57,7 +57,7 @@ export default function BrandCard({ brandName, items, onViewBrand }: Props) {
           className="brandImage"
           onError={(e) => {
             (e.currentTarget as HTMLImageElement).src =
-              "https://i0.wp.com/limerickpride.ie/wp-content/uploads/2024/06/Tesco-logo.png?ssl=1";
+              "https://monkeybanners.co.uk/app/uploads/2020/05/Asda-logo.png";
           }}
         />
         <button

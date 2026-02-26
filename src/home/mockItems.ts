@@ -60,8 +60,7 @@ export const mockItems: Item[] = [
     shop: "Asda Straiton Superstore",
     brand: "Asda",
     type: "Grocery",
-    shopImage:
-      "https://static.where-e.com/United_Kingdom/Asda-Straiton-Superstore_0c7dbd6b34741eaee989aa4992a9f6d5.jpg",
+    shopImage: "https://monkeybanners.co.uk/app/uploads/2020/05/Asda-logo.png",
     openHours: {
       Mon: { open: "07:00", close: "22:00" },
       Tue: { open: "07:00", close: "22:00" },

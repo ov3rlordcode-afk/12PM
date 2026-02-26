@@ -19,7 +19,10 @@ export default function UserHome({ name, city, onLogout }: Props) {
   const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
   const [selectedShop, setSelectedShop] = useState<string | null>(null);
   const [shopCategory, setShopCategory] = useState("All");
-  const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  // Separate dropdown states
+  const [ordersDropdownOpen, setOrdersDropdownOpen] = useState(false);
+  const [supportDropdownOpen, setSupportDropdownOpen] = useState(false);
 
   const [cart, setCart] = useState<Item[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
@@ -35,7 +38,6 @@ export default function UserHome({ name, city, onLogout }: Props) {
     );
   }, [search]);
 
-  // GROUP BY BRAND
   const brands = useMemo(() => {
     const grouped: Record<string, Item[]> = {};
     filteredItems.forEach((item) => {
@@ -45,7 +47,6 @@ export default function UserHome({ name, city, onLogout }: Props) {
     return grouped;
   }, [filteredItems]);
 
-  // GET UNIQUE SHOPS FOR SELECTED BRAND
   const brandLocations = useMemo(() => {
     if (!selectedBrand) return [];
     const unique = new Map<string, Item>();
@@ -57,7 +58,6 @@ export default function UserHome({ name, city, onLogout }: Props) {
     return Array.from(unique.values());
   }, [selectedBrand, filteredItems]);
 
-  // GET ITEMS FOR SELECTED SHOP
   const shopItems = useMemo(() => {
     if (!selectedShop) return [];
     return filteredItems.filter(
@@ -131,16 +131,21 @@ export default function UserHome({ name, city, onLogout }: Props) {
             <h2 className="logo" onClick={goHome}>
               Swift2Me
             </h2>
+
             <ul className="navMenu">
-              <li onClick={goHome}>Home</li>
+              <li onClick={goHome}>About Us</li>
               <li onClick={() => selectBrand("")}>Brands</li>
+              <li onClick={goHome}>Items</li>
+              <li onClick={goHome}>Drivers</li>
+
+              {/* ORDERS DROPDOWN */}
               <li
                 className="navItem"
-                onMouseEnter={() => setDropdownOpen(true)}
-                onMouseLeave={() => setDropdownOpen(false)}
+                onMouseEnter={() => setOrdersDropdownOpen(true)}
+                onMouseLeave={() => setOrdersDropdownOpen(false)}
               >
                 Orders
-                {dropdownOpen && (
+                {ordersDropdownOpen && (
                   <div className="dropdownMenu">
                     <div className="dropdownItem">Pending Orders</div>
                     <div className="dropdownItem">Completed Orders</div>
@@ -148,8 +153,22 @@ export default function UserHome({ name, city, onLogout }: Props) {
                   </div>
                 )}
               </li>
-              <li onClick={() => alert("Profile page coming soon!")}>
-                Profile
+
+              {/* SUPPORT DROPDOWN */}
+              <li
+                className="navItem"
+                onMouseEnter={() => setSupportDropdownOpen(true)}
+                onMouseLeave={() => setSupportDropdownOpen(false)}
+              >
+                Support
+                {supportDropdownOpen && (
+                  <div className="dropdownMenu">
+                    <div className="dropdownItem">Help Center</div>
+                    <div className="dropdownItem">Contact Us</div>
+                    <div className="dropdownItem">Report an Issue</div>
+                    <div className="dropdownItem">FAQs</div>
+                  </div>
+                )}
               </li>
             </ul>
           </div>

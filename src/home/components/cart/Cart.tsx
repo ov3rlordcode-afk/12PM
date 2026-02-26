@@ -9,16 +9,10 @@ type Props = {
   removeFromCart: (index: number) => void;
   incrementItem: (index: number) => void;
   decrementItem: (index: number) => void;
-  placeOrder: (paymentInfo: PaymentInfo, promoCode?: string) => void;
+  placeOrder: (promoCode?: string) => void;
   totalPrice: number;
   orderSuccess: boolean;
   setOrderSuccess: (open: boolean) => void;
-};
-
-type PaymentInfo = {
-  cardNumber: string;
-  expiry: string;
-  cvv: string;
 };
 
 const DELIVERY_FEE_PER_SHOP = 2.99;
@@ -54,19 +48,15 @@ export default function Cart({
   orderSuccess,
   setOrderSuccess,
 }: Props) {
-  const [paymentInfo, setPaymentInfo] = useState<PaymentInfo>({
-    cardNumber: "",
-    expiry: "",
-    cvv: "",
-  });
   const [promoCode, setPromoCode] = useState("");
   const [discount, setDiscount] = useState(0);
 
+  // ====== Group cart items by shop AND stack identical items ======
   const groupedByShop = useMemo(() => {
     const grouped: Record<
       string,
       {
-        items: { item: Item; index: number }[];
+        items: { item: Item; quantity: number; indexes: number[] }[];
         address: string;
         distanceKm: number;
         subtotal: number;
@@ -101,7 +91,23 @@ export default function Cart({
           stats,
         };
       }
-      grouped[item.shop].items.push({ item, index });
+
+      // Stack same items by name + brand
+      const existingItem = grouped[item.shop].items.find(
+        (i) => i.item.name === item.name && i.item.brand === item.brand
+      );
+
+      if (existingItem) {
+        existingItem.quantity += item.quantity || 1;
+        existingItem.indexes.push(index);
+      } else {
+        grouped[item.shop].items.push({
+          item,
+          quantity: item.quantity || 1,
+          indexes: [index],
+        });
+      }
+
       grouped[item.shop].subtotal += item.price * (item.quantity || 1);
     });
 
@@ -114,7 +120,6 @@ export default function Cart({
   const grandTotal = totalPrice + totalDelivery - discount;
 
   const handleApplyPromo = () => {
-    // Simple demo: code "SAVE10" gives £10 discount
     if (promoCode.trim().toUpperCase() === "SAVE10") {
       setDiscount(10);
       alert("Promo code applied! £10 discount applied to your order.");
@@ -125,11 +130,7 @@ export default function Cart({
   };
 
   const handlePlaceOrder = () => {
-    if (!paymentInfo.cardNumber || !paymentInfo.expiry || !paymentInfo.cvv) {
-      alert("Please fill in all payment details.");
-      return;
-    }
-    placeOrder(paymentInfo, promoCode);
+    placeOrder(promoCode);
   };
 
   return (
@@ -163,22 +164,26 @@ export default function Cart({
                   </div>
                 </div>
 
-                {data.items.map(({ item, index }) => (
-                  <div key={`${shopName}-${index}`} className="cartItem">
+                {data.items.map(({ item, quantity, indexes }) => (
+                  <div key={`${shopName}-${item.name}`} className="cartItem">
                     <div className="cartItemInfo">
                       <strong>{item.name}</strong>
                       <small>Brand: {item.brand}</small>
                       <div className="quantityControls">
-                        <button onClick={() => decrementItem(index)}>-</button>
-                        <span>{item.quantity || 1}</span>
-                        <button onClick={() => incrementItem(index)}>+</button>
+                        <button onClick={() => decrementItem(indexes[0])}>
+                          -
+                        </button>
+                        <span>{quantity}</span>
+                        <button onClick={() => incrementItem(indexes[0])}>
+                          +
+                        </button>
                       </div>
                     </div>
                     <div className="cartItemRight">
-                      <span>
-                        £{((item.price || 0) * (item.quantity || 1)).toFixed(2)}
-                      </span>
-                      <button onClick={() => removeFromCart(index)}>✕</button>
+                      <span>£{(item.price * quantity).toFixed(2)}</span>
+                      <button onClick={() => removeFromCart(indexes[0])}>
+                        ✕
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -188,35 +193,9 @@ export default function Cart({
             <p className="emptyCartMsg">Your cart is empty.</p>
           )}
 
-          {/* ================= PAYMENT & PROMO ================= */}
+          {/* ===== Promo Code Section ===== */}
           {totalItems > 0 && (
             <div className="paymentSection">
-              <h4>Payment Details</h4>
-              <input
-                type="text"
-                placeholder="Card Number"
-                value={paymentInfo.cardNumber}
-                onChange={(e) =>
-                  setPaymentInfo({ ...paymentInfo, cardNumber: e.target.value })
-                }
-              />
-              <input
-                type="text"
-                placeholder="MM/YY"
-                value={paymentInfo.expiry}
-                onChange={(e) =>
-                  setPaymentInfo({ ...paymentInfo, expiry: e.target.value })
-                }
-              />
-              <input
-                type="text"
-                placeholder="CVV"
-                value={paymentInfo.cvv}
-                onChange={(e) =>
-                  setPaymentInfo({ ...paymentInfo, cvv: e.target.value })
-                }
-              />
-
               <h4>Promo Code</h4>
               <div className="promoRow">
                 <input
