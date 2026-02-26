@@ -40,7 +40,7 @@ const MiniItemsPreview = ({ items }: { items: Item[] }) => {
 export default function BrandCard({ brandName, items, onViewBrand }: Props) {
   const brandImage =
     items.find((item) => item.image)?.image ??
-    "https://via.placeholder.com/150?text=No+Brand+Image";
+    "https://i0.wp.com/limerickpride.ie/wp-content/uploads/2024/06/Tesco-logo.png?ssl=1";
 
   const totalItems = items.length;
   const totalShops = new Set(items.map((i) => i.shop)).size;
@@ -57,7 +57,7 @@ export default function BrandCard({ brandName, items, onViewBrand }: Props) {
           className="brandImage"
           onError={(e) => {
             (e.currentTarget as HTMLImageElement).src =
-              "https://via.placeholder.com/150?text=No+Brand+Image";
+              "https://i0.wp.com/limerickpride.ie/wp-content/uploads/2024/06/Tesco-logo.png?ssl=1";
           }}
         />
         <button
