@@ -1,0 +1,262 @@
+/* ================= CART ICON ================= */
+.cartIcon {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #ff6b6b;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  font-size: 1.3rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
+  transition: transform 0.2s;
+}
+
+.cartIcon:hover {
+  transform: scale(1.1);
+}
+
+/* ================= CART DRAWER ================= */
+.cartDrawer {
+  position: fixed;
+  top: 0;
+  right: -450px;
+  width: 400px;
+  max-width: 90%;
+  height: 100%;
+  background-color: #1e1e1e;
+  box-shadow: -4px 0 12px rgba(0, 0, 0, 0.8);
+  transition: right 0.3s ease;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  color: #e0e0e0;
+}
+
+.cartDrawer.open {
+  right: 0;
+}
+
+.cartHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid #333;
+}
+
+.cartHeader h3 {
+  margin: 0;
+  color: #fff;
+}
+
+/* ================= CART CONTENT ================= */
+.cartContent {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+}
+
+.cartShopGroup {
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid #333;
+  padding-bottom: 1rem;
+}
+
+.cartShopHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.5rem;
+}
+
+.cartShopHeader h4 {
+  margin: 0 0 0.2rem 0;
+  color: #fff;
+}
+
+.cartShopAddress {
+  font-size: 0.85rem;
+  color: #aaa;
+  margin: 0 0 0.3rem 0;
+}
+
+.shopTotals {
+  text-align: right;
+  font-size: 0.85rem;
+  color: #ccc;
+}
+
+.cartItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-top: 1px solid #333;
+}
+
+.cartItemInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.quantityControls {
+  display: flex;
+  align-items: center;
+  margin-top: 0.3rem;
+}
+
+.quantityControls button {
+  width: 25px;
+  height: 25px;
+  margin: 0 5px;
+  background-color: #333;
+  border: none;
+  border-radius: 5px;
+  color: #fff;
+  cursor: pointer;
+}
+
+.cartItemRight {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  color: #fff;
+}
+
+.cartItemRight button {
+  margin-top: 5px;
+  background: none;
+  border: none;
+  color: #ff6b6b;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+/* ================= EMPTY CART ================= */
+.emptyCartMsg {
+  text-align: center;
+  color: #777;
+  padding: 2rem 0;
+}
+
+/* ================= CART FOOTER ================= */
+.cartFooter {
+  padding: 1rem;
+  border-top: 1px solid #333;
+}
+
+.cartSummaryRow {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  color: #e0e0e0;
+}
+
+.cartSummaryRow.grandTotal {
+  font-size: 1.1rem;
+  color: #fff;
+}
+
+.checkoutBtn {
+  width: 100%;
+  padding: 0.8rem;
+  background-color: #ff6b6b;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-top: 0.5rem;
+  transition: background 0.2s;
+}
+
+.checkoutBtn:hover {
+  background-color: #ff4757;
+}
+
+/* ================= PAYMENT & PROMO ================= */
+.paymentSection {
+  margin-top: 1rem;
+}
+
+.paymentSection h4 {
+  margin: 0.5rem 0;
+  color: #fff;
+}
+
+.paymentSection input {
+  width: 100%;
+  padding: 0.5rem;
+  margin-bottom: 0.5rem;
+  border-radius: 5px;
+  border: 1px solid #555;
+  background-color: #2b2b2b;
+  color: #e0e0e0;
+}
+
+.paymentSection input::placeholder {
+  color: #888;
+}
+
+.promoRow {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.promoRow input {
+  flex: 1;
+}
+
+.promoRow button {
+  padding: 0.5rem 1rem;
+  background-color: #1dd1a1;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.promoRow button:hover {
+  background-color: #10ac84;
+}
+
+/* ================= SUCCESS MODAL ================= */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.successModal {
+  background: #2b2b2b;
+  padding: 2rem;
+  border-radius: 12px;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  color: #e0e0e0;
+}
+
+.successModal h2 {
+  margin-bottom: 1rem;
+  color: #fff;
+}
+
+.successModal p {
+  margin-bottom: 1rem;
+}

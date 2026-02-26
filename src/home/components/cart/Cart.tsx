@@ -1,5 +1,6 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { Item } from "../../mockItems";
+import "./Cart.css";
 
 type Props = {
   cart: Item[];
@@ -8,16 +9,21 @@ type Props = {
   removeFromCart: (index: number) => void;
   incrementItem: (index: number) => void;
   decrementItem: (index: number) => void;
-  placeOrder: () => void;
+  placeOrder: (paymentInfo: PaymentInfo, promoCode?: string) => void;
   totalPrice: number;
   orderSuccess: boolean;
   setOrderSuccess: (open: boolean) => void;
 };
 
+type PaymentInfo = {
+  cardNumber: string;
+  expiry: string;
+  cvv: string;
+};
+
 const DELIVERY_FEE_PER_SHOP = 2.99;
 const USER_LOCATION = { lat: 55.9533, lng: -3.1883 };
 
-// Calculate distance in km
 const getDistanceKm = (
   lat1: number,
   lon1: number,
@@ -48,7 +54,14 @@ export default function Cart({
   orderSuccess,
   setOrderSuccess,
 }: Props) {
-  /* ================= GROUP BY SHOP ================= */
+  const [paymentInfo, setPaymentInfo] = useState<PaymentInfo>({
+    cardNumber: "",
+    expiry: "",
+    cvv: "",
+  });
+  const [promoCode, setPromoCode] = useState("");
+  const [discount, setDiscount] = useState(0);
+
   const groupedByShop = useMemo(() => {
     const grouped: Record<
       string,
@@ -98,14 +111,31 @@ export default function Cart({
   const totalItems = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
   const totalDelivery =
     Object.keys(groupedByShop).length * DELIVERY_FEE_PER_SHOP;
-  const grandTotal = totalPrice + totalDelivery;
+  const grandTotal = totalPrice + totalDelivery - discount;
+
+  const handleApplyPromo = () => {
+    // Simple demo: code "SAVE10" gives £10 discount
+    if (promoCode.trim().toUpperCase() === "SAVE10") {
+      setDiscount(10);
+      alert("Promo code applied! £10 discount applied to your order.");
+    } else {
+      alert("Invalid promo code.");
+      setDiscount(0);
+    }
+  };
+
+  const handlePlaceOrder = () => {
+    if (!paymentInfo.cardNumber || !paymentInfo.expiry || !paymentInfo.cvv) {
+      alert("Please fill in all payment details.");
+      return;
+    }
+    placeOrder(paymentInfo, promoCode);
+  };
 
   return (
     <>
-      {/* ================= CART ICON ================= */}
       <button className="cartIcon">{`🛒 ${totalItems}`}</button>
 
-      {/* ================= CART DRAWER ================= */}
       <div className={`cartDrawer ${cartOpen ? "open" : ""}`}>
         <div className="cartHeader">
           <h3>Your Cart ({totalItems} items)</h3>
@@ -116,7 +146,6 @@ export default function Cart({
           {totalItems ? (
             Object.entries(groupedByShop).map(([shopName, data]) => (
               <div key={shopName} className="cartShopGroup">
-                {/* SHOP HEADER */}
                 <div className="cartShopHeader">
                   <div>
                     <h4>{shopName}</h4>
@@ -134,7 +163,6 @@ export default function Cart({
                   </div>
                 </div>
 
-                {/* SHOP ITEMS */}
                 {data.items.map(({ item, index }) => (
                   <div key={`${shopName}-${index}`} className="cartItem">
                     <div className="cartItemInfo">
@@ -159,9 +187,50 @@ export default function Cart({
           ) : (
             <p className="emptyCartMsg">Your cart is empty.</p>
           )}
+
+          {/* ================= PAYMENT & PROMO ================= */}
+          {totalItems > 0 && (
+            <div className="paymentSection">
+              <h4>Payment Details</h4>
+              <input
+                type="text"
+                placeholder="Card Number"
+                value={paymentInfo.cardNumber}
+                onChange={(e) =>
+                  setPaymentInfo({ ...paymentInfo, cardNumber: e.target.value })
+                }
+              />
+              <input
+                type="text"
+                placeholder="MM/YY"
+                value={paymentInfo.expiry}
+                onChange={(e) =>
+                  setPaymentInfo({ ...paymentInfo, expiry: e.target.value })
+                }
+              />
+              <input
+                type="text"
+                placeholder="CVV"
+                value={paymentInfo.cvv}
+                onChange={(e) =>
+                  setPaymentInfo({ ...paymentInfo, cvv: e.target.value })
+                }
+              />
+
+              <h4>Promo Code</h4>
+              <div className="promoRow">
+                <input
+                  type="text"
+                  placeholder="Enter code"
+                  value={promoCode}
+                  onChange={(e) => setPromoCode(e.target.value)}
+                />
+                <button onClick={handleApplyPromo}>Apply</button>
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* ================= CART FOOTER ================= */}
         {totalItems > 0 && (
           <div className="cartFooter">
             <div className="cartSummaryRow">
@@ -172,18 +241,23 @@ export default function Cart({
               <span>Delivery Total</span>
               <span>£{totalDelivery.toFixed(2)}</span>
             </div>
+            {discount > 0 && (
+              <div className="cartSummaryRow">
+                <span>Discount</span>
+                <span>-£{discount.toFixed(2)}</span>
+              </div>
+            )}
             <div className="cartSummaryRow grandTotal">
               <strong>Grand Total</strong>
               <strong>£{grandTotal.toFixed(2)}</strong>
             </div>
-            <button className="checkoutBtn" onClick={placeOrder}>
+            <button className="checkoutBtn" onClick={handlePlaceOrder}>
               Place Order
             </button>
           </div>
         )}
       </div>
 
-      {/* ================= SUCCESS MODAL ================= */}
       {orderSuccess && (
         <div className="modalOverlay">
           <div className="successModal">
@@ -191,6 +265,10 @@ export default function Cart({
             <p>
               Your order containing {totalItems} item{totalItems > 1 ? "s" : ""}{" "}
               has been placed successfully.
+            </p>
+            <p>
+              ✅ A driver will be notified shortly and will claim your order.
+              You will receive a notification once your delivery is on the way.
             </p>
             <button onClick={() => setOrderSuccess(false)}>Close</button>
           </div>
