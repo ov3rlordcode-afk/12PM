@@ -117,142 +117,149 @@ export default function UserHome({ name, city, onLogout }: Props) {
   /* ================= RENDER ================= */
 
   return (
-    <div className="userHome app">
-      <nav className="homeNavbar">
-        <div className="navLeft">
-          <h2 className="logo" onClick={goHome}>
-            Swift2Me
-          </h2>
+    <div className="userHome">
+      <div className="boxedContainer">
+        {/* ================= NAVBAR ================= */}
+        <nav className="homeNavbar">
+          <div className="navLeft">
+            <h2 className="logo" onClick={goHome}>
+              Swift2Me
+            </h2>
 
-          <ul className="navMenu">
-            <li onClick={goHome}>Home</li>
+            <ul className="navMenu">
+              <li onClick={goHome}>Home</li>
 
-            <li
-              onClick={() => {
-                setSelectedBrand(null);
-                setSelectedShop(null);
-              }}
-            >
-              Brands
-            </li>
-
-            <li
-              className="navItem"
-              onMouseEnter={() => setDropdownOpen(true)}
-              onMouseLeave={() => setDropdownOpen(false)}
-            >
-              Orders
-              {dropdownOpen && (
-                <div className="dropdownMenu">
-                  <div className="dropdownItem">Pending Orders</div>
-                  <div className="dropdownItem">Completed Orders</div>
-                  <div className="dropdownItem">Cancelled Orders</div>
-                </div>
-              )}
-            </li>
-
-            <li onClick={() => alert("Profile page coming soon!")}>Profile</li>
-          </ul>
-        </div>
-
-        <div className="navRight">
-          <input
-            type="text"
-            placeholder="Search stores, brands or items..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="searchInput"
-          />
-
-          <Cart
-            cart={cart}
-            cartOpen={cartOpen}
-            setCartOpen={setCartOpen}
-            removeFromCart={removeFromCart}
-            placeOrder={placeOrder}
-            totalPrice={totalPrice}
-            orderSuccess={orderSuccess}
-            setOrderSuccess={setOrderSuccess}
-          />
-
-          <AvatarDropdown onLogout={onLogout} />
-        </div>
-      </nav>
-
-      {!selectedBrand && !selectedShop && (
-        <div className="itemsGrid">
-          {Object.entries(brands).length ? (
-            Object.entries(brands).map(([brandName, items]) => (
-              <BrandCard
-                key={brandName}
-                brandName={brandName}
-                items={items}
-                onViewBrand={() => setSelectedBrand(brandName)}
-              />
-            ))
-          ) : (
-            <p className="noResults">No brands found.</p>
-          )}
-        </div>
-      )}
-
-      {selectedBrand && !selectedShop && (
-        <>
-          <div className="brandHeader">
-            <h2>{selectedBrand} Locations</h2>
-            <button className="backBtn" onClick={goHome}>
-              ← Back
-            </button>
-          </div>
-
-          <div className="itemsGrid">
-            {brandLocations.map((shop) => (
-              <LocationCard
-                key={shop.shop}
-                shopName={shop.shop}
-                shopImage={shop.shopImage}
-                openHours={shop.openHours}
-                address={shop.address}
-                website={shop.website}
-                onSelectShop={() => {
-                  setSelectedShop(shop.shop);
-                  setShopCategory("All");
+              <li
+                onClick={() => {
+                  setSelectedBrand(null);
+                  setSelectedShop(null);
                 }}
-              />
-            ))}
-          </div>
-        </>
-      )}
+              >
+                Brands
+              </li>
 
-      {selectedShop && (
-        <div className="shopMenu">
-          <div className="shopHeader">
-            <h3>{selectedShop} Menu</h3>
-            <button onClick={() => setSelectedShop(null)}>← Back</button>
+              <li
+                className="navItem"
+                onMouseEnter={() => setDropdownOpen(true)}
+                onMouseLeave={() => setDropdownOpen(false)}
+              >
+                Orders
+                {dropdownOpen && (
+                  <div className="dropdownMenu">
+                    <div className="dropdownItem">Pending Orders</div>
+                    <div className="dropdownItem">Completed Orders</div>
+                    <div className="dropdownItem">Cancelled Orders</div>
+                  </div>
+                )}
+              </li>
+
+              <li onClick={() => alert("Profile page coming soon!")}>
+                Profile
+              </li>
+            </ul>
           </div>
 
-          <div className="categories">
-            {categories.map((cat) => (
-              <CategoryButton
-                key={cat}
-                category={cat}
-                isActive={shopCategory === cat}
-                onClick={() => setShopCategory(cat)}
-              />
-            ))}
-          </div>
+          <div className="navRight">
+            <input
+              type="text"
+              placeholder="Search stores, brands or items..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="searchInput"
+            />
 
+            <Cart
+              cart={cart}
+              cartOpen={cartOpen}
+              setCartOpen={setCartOpen}
+              removeFromCart={removeFromCart}
+              placeOrder={placeOrder}
+              totalPrice={totalPrice}
+              orderSuccess={orderSuccess}
+              setOrderSuccess={setOrderSuccess}
+            />
+
+            <AvatarDropdown onLogout={onLogout} />
+          </div>
+        </nav>
+
+        {/* ================= MAIN CONTENT ================= */}
+
+        {!selectedBrand && !selectedShop && (
           <div className="itemsGrid">
-            {shopItems.length ? (
-              shopItems.map((item) => (
-                <ItemCard key={item.id} item={item} onAddToCart={addToCart} />
+            {Object.entries(brands).length ? (
+              Object.entries(brands).map(([brandName, items]) => (
+                <BrandCard
+                  key={brandName}
+                  brandName={brandName}
+                  items={items}
+                  onViewBrand={() => setSelectedBrand(brandName)}
+                />
               ))
             ) : (
-              <p className="noResults">No items available.</p>
+              <p className="noResults">No brands found.</p>
             )}
           </div>
-        </div>
-      )}
+        )}
+
+        {selectedBrand && !selectedShop && (
+          <>
+            <div className="brandHeader">
+              <h2>{selectedBrand} Locations</h2>
+              <button className="backBtn" onClick={goHome}>
+                ← Back
+              </button>
+            </div>
+
+            <div className="itemsGrid">
+              {brandLocations.map((shop) => (
+                <LocationCard
+                  key={shop.shop}
+                  shopName={shop.shop}
+                  shopImage={shop.shopImage}
+                  openHours={shop.openHours}
+                  address={shop.address}
+                  website={shop.website}
+                  onSelectShop={() => {
+                    setSelectedShop(shop.shop);
+                    setShopCategory("All");
+                  }}
+                />
+              ))}
+            </div>
+          </>
+        )}
+
+        {selectedShop && (
+          <div className="shopMenu">
+            <div className="shopHeader">
+              <h3>{selectedShop} Menu</h3>
+              <button onClick={() => setSelectedShop(null)}>← Back</button>
+            </div>
+
+            <div className="categories">
+              {categories.map((cat) => (
+                <CategoryButton
+                  key={cat}
+                  category={cat}
+                  isActive={shopCategory === cat}
+                  onClick={() => setShopCategory(cat)}
+                />
+              ))}
+            </div>
+
+            <div className="itemsGrid">
+              {shopItems.length ? (
+                shopItems.map((item) => (
+                  <ItemCard key={item.id} item={item} onAddToCart={addToCart} />
+                ))
+              ) : (
+                <p className="noResults">No items available.</p>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
