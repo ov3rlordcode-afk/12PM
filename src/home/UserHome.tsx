@@ -2,6 +2,7 @@
 
 import React, { useMemo, useState } from "react";
 import "./UserHome.css";
+import "../help/help.css";
 import { mockItems, Item, categories } from "./mockItems";
 import BrandCard from "./components/BrandCard";
 import LocationCard from "./components/location/LocationCard";
