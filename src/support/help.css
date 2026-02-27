@@ -1,0 +1,100 @@
+/* help.css - Dark Swift2Me style - All White Text */
+
+.helpContainer {
+  font-family: "Inter", sans-serif;
+  background-color: #121212; /* dark background */
+  color: #fff; /* all text white */
+  padding: 40px 20px;
+  min-height: 80vh;
+}
+
+/* Header */
+.helpHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.helpHeader h1 {
+  font-size: 2.2rem;
+  color: #fff; /* white text */
+  margin: 0;
+}
+
+/* Back button */
+.helpHeader .backBtn {
+  padding: 8px 15px;
+  background-color: #ff4d6d;
+  color: #fff; /* white text */
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.helpHeader .backBtn:hover {
+  background-color: #e04360;
+}
+
+/* Sections */
+.helpContent {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.helpSection {
+  background-color: #1e1e1e;
+  border-radius: 12px;
+  padding: 25px 20px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.helpSection:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.7);
+}
+
+.helpSection h2 {
+  margin-bottom: 12px;
+  font-size: 1.5rem;
+  color: #fff; /* white heading */
+}
+
+.helpSection p,
+.helpSection ul,
+.helpSection li {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #fff; /* all text white */
+}
+
+.helpSection ul {
+  padding-left: 20px;
+}
+
+/* Contact Button */
+.contactBtn {
+  display: inline-block;
+  margin-top: 15px;
+  padding: 12px 25px;
+  background-color: #ff4d6d;
+  color: #fff; /* white text */
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.contactBtn:hover {
+  background-color: #e04360;
+  transform: translateY(-2px);
+}

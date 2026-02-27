@@ -1,0 +1,23 @@
+/* contactus.css */
+.contactPageWrapper {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 100%;
+  max-width: 600px;
+  height: 100vh;
+  background-color: transparent;
+  z-index: 200;
+  transform: translateX(100%);
+  animation: slideIn 0.5s forwards ease-out;
+  box-shadow: -5px 0 40px rgba(0, 0, 0, 0.7);
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0%);
+  }
+}

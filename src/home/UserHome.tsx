@@ -3,6 +3,7 @@
 import React, { useMemo, useState } from "react";
 import "./UserHome.css";
 import "../help/help.css";
+import "../help/contactus.css";
 import { mockItems, Item, categories } from "./mockItems";
 import BrandCard from "./components/BrandCard";
 import LocationCard from "./components/location/LocationCard";
@@ -10,6 +11,7 @@ import ItemCard from "./components/ItemCard";
 import AvatarDropdown from "./components/AvatarDropdown";
 import CategoryButton from "./components/CategoryButton";
 import Cart from "./components/cart/Cart";
+import ContactUs from "../help/contactus"; // <-- imported
 
 type Props = {
   name: string;
@@ -23,12 +25,11 @@ export default function UserHome({ name, city, onLogout }: Props) {
   const [selectedShop, setSelectedShop] = useState<string | null>(null);
   const [shopCategory, setShopCategory] = useState("All");
 
-  // Separate dropdown states
   const [ordersDropdownOpen, setOrdersDropdownOpen] = useState(false);
   const [supportDropdownOpen, setSupportDropdownOpen] = useState(false);
 
-  // Help Center state
   const [showHelpCenter, setShowHelpCenter] = useState(false);
+  const [showContactPage, setShowContactPage] = useState(false); // NEW state for modal
 
   const [cart, setCart] = useState<Item[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
@@ -113,6 +114,7 @@ export default function UserHome({ name, city, onLogout }: Props) {
     setShopCategory("All");
     setSearch("");
     setShowHelpCenter(false);
+    setShowContactPage(false);
   };
 
   const selectBrand = (brand: string) => {
@@ -121,6 +123,7 @@ export default function UserHome({ name, city, onLogout }: Props) {
     setShopCategory("All");
     setSearch("");
     setShowHelpCenter(false);
+    setShowContactPage(false);
   };
 
   const selectShop = (shop: string) => {
@@ -128,6 +131,7 @@ export default function UserHome({ name, city, onLogout }: Props) {
     setShopCategory("All");
     setSearch("");
     setShowHelpCenter(false);
+    setShowContactPage(false);
   };
 
   /* ================= RENDER ================= */
@@ -140,14 +144,12 @@ export default function UserHome({ name, city, onLogout }: Props) {
             <h2 className="logo" onClick={goHome}>
               Swift2Me
             </h2>
-
             <ul className="navMenu">
               <li onClick={goHome}>About Us</li>
               <li onClick={() => selectBrand("")}>Brands</li>
               <li onClick={goHome}>Items</li>
               <li onClick={goHome}>Drivers</li>
 
-              {/* ORDERS DROPDOWN */}
               <li
                 className="navItem"
                 onMouseEnter={() => setOrdersDropdownOpen(true)}
@@ -163,7 +165,6 @@ export default function UserHome({ name, city, onLogout }: Props) {
                 )}
               </li>
 
-              {/* SUPPORT DROPDOWN */}
               <li
                 className="navItem"
                 onMouseEnter={() => setSupportDropdownOpen(true)}
@@ -182,7 +183,15 @@ export default function UserHome({ name, city, onLogout }: Props) {
                     >
                       Help Center
                     </div>
-                    <div className="dropdownItem">Contact Us</div>
+                    <div
+                      className="dropdownItem"
+                      onClick={() => {
+                        setShowContactPage(true);
+                        setShowHelpCenter(false);
+                      }}
+                    >
+                      Contact Us
+                    </div>
                     <div className="dropdownItem">Report an Issue</div>
                     <div className="dropdownItem">FAQs</div>
                   </div>
@@ -216,7 +225,7 @@ export default function UserHome({ name, city, onLogout }: Props) {
         </nav>
 
         {/* ================= MAIN CONTENT ================= */}
-        {showHelpCenter && (
+        {showHelpCenter && !showContactPage && (
           <div className="helpContainer">
             <div className="helpHeader">
               <h1>Help & Support</h1>
@@ -260,59 +269,81 @@ export default function UserHome({ name, city, onLogout }: Props) {
                   Still need help? Reach out to our support team and we’ll
                   respond as soon as possible.
                 </p>
-                <button className="contactBtn">Contact Us</button>
+                <button
+                  className="contactBtn"
+                  onClick={() => {
+                    setShowContactPage(true);
+                    setShowHelpCenter(false);
+                  }}
+                >
+                  Contact Us
+                </button>
               </section>
             </div>
           </div>
         )}
 
-        {!showHelpCenter && !selectedBrand && !selectedShop && (
-          <div className="itemsGrid">
-            {Object.entries(brands).length ? (
-              Object.entries(brands).map(([brandName, items]) => (
-                <BrandCard
-                  key={brandName}
-                  brandName={brandName}
-                  items={items}
-                  onViewBrand={() => selectBrand(brandName)}
-                />
-              ))
-            ) : (
-              <p className="noResults">No brands found.</p>
-            )}
+        {/* ================= CONTACT PAGE SLIDE-IN ================= */}
+        {showContactPage && (
+          <div className="contactPageWrapper">
+            <ContactUs onBack={() => setShowContactPage(false)} />
           </div>
         )}
 
-        {selectedBrand && !selectedShop && !showHelpCenter && (
-          <>
-            <div className="brandHeader">
-              <h2>{selectedBrand} Locations</h2>
-              <button className="backBtn" onClick={goHome}>
-                ← Back
-              </button>
-            </div>
-
+        {/* ================= Existing Brand / Shop / Items ================= */}
+        {!showHelpCenter &&
+          !selectedBrand &&
+          !selectedShop &&
+          !showContactPage && (
             <div className="itemsGrid">
-              {brandLocations.length ? (
-                brandLocations.map((shop) => (
-                  <LocationCard
-                    key={shop.shop}
-                    shopName={shop.shop}
-                    shopImage={shop.shopImage}
-                    openHours={shop.openHours}
-                    address={shop.shop}
-                    website={shop.website}
-                    onSelectShop={() => selectShop(shop.shop)}
+              {Object.entries(brands).length ? (
+                Object.entries(brands).map(([brandName, items]) => (
+                  <BrandCard
+                    key={brandName}
+                    brandName={brandName}
+                    items={items}
+                    onViewBrand={() => selectBrand(brandName)}
                   />
                 ))
               ) : (
-                <p className="noResults">No shops found for this brand.</p>
+                <p className="noResults">No brands found.</p>
               )}
             </div>
-          </>
-        )}
+          )}
 
-        {selectedShop && !showHelpCenter && (
+        {selectedBrand &&
+          !selectedShop &&
+          !showHelpCenter &&
+          !showContactPage && (
+            <>
+              <div className="brandHeader">
+                <h2>{selectedBrand} Locations</h2>
+                <button className="backBtn" onClick={goHome}>
+                  ← Back
+                </button>
+              </div>
+
+              <div className="itemsGrid">
+                {brandLocations.length ? (
+                  brandLocations.map((shop) => (
+                    <LocationCard
+                      key={shop.shop}
+                      shopName={shop.shop}
+                      shopImage={shop.shopImage}
+                      openHours={shop.openHours}
+                      address={shop.shop}
+                      website={shop.website}
+                      onSelectShop={() => selectShop(shop.shop)}
+                    />
+                  ))
+                ) : (
+                  <p className="noResults">No shops found for this brand.</p>
+                )}
+              </div>
+            </>
+          )}
+
+        {selectedShop && !showHelpCenter && !showContactPage && (
           <div className="shopMenu">
             <div className="shopHeader">
               <h3>{selectedShop} Menu</h3>
