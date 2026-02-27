@@ -51,8 +51,7 @@ export default function ContactUs({ onBack }: ContactUsProps) {
         )}
       </main>
 
-      {/* Optional floating neon background */}
-      <div className="floatingBackground"></div>
+      {/* Removed flashy/spinner background */}
     </div>
   );
 }

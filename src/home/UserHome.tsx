@@ -4,6 +4,7 @@ import React, { useMemo, useState } from "react";
 import "./UserHome.css";
 import "../help/help.css";
 import "../help/contactus.css";
+import "../help/reportissue.css";
 import { mockItems, Item, categories } from "./mockItems";
 import BrandCard from "./components/BrandCard";
 import LocationCard from "./components/location/LocationCard";
@@ -11,7 +12,8 @@ import ItemCard from "./components/ItemCard";
 import AvatarDropdown from "./components/AvatarDropdown";
 import CategoryButton from "./components/CategoryButton";
 import Cart from "./components/cart/Cart";
-import ContactUs from "../help/contactus"; // <-- imported
+import ContactUs from "../help/contactus";
+import ReportIssue from "../help/reportissue";
 
 type Props = {
   name: string;
@@ -29,7 +31,8 @@ export default function UserHome({ name, city, onLogout }: Props) {
   const [supportDropdownOpen, setSupportDropdownOpen] = useState(false);
 
   const [showHelpCenter, setShowHelpCenter] = useState(false);
-  const [showContactPage, setShowContactPage] = useState(false); // NEW state for modal
+  const [showContactPage, setShowContactPage] = useState(false);
+  const [showReportPage, setShowReportPage] = useState(false);
 
   const [cart, setCart] = useState<Item[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
@@ -115,6 +118,7 @@ export default function UserHome({ name, city, onLogout }: Props) {
     setSearch("");
     setShowHelpCenter(false);
     setShowContactPage(false);
+    setShowReportPage(false);
   };
 
   const selectBrand = (brand: string) => {
@@ -124,6 +128,7 @@ export default function UserHome({ name, city, onLogout }: Props) {
     setSearch("");
     setShowHelpCenter(false);
     setShowContactPage(false);
+    setShowReportPage(false);
   };
 
   const selectShop = (shop: string) => {
@@ -132,7 +137,20 @@ export default function UserHome({ name, city, onLogout }: Props) {
     setSearch("");
     setShowHelpCenter(false);
     setShowContactPage(false);
+    setShowReportPage(false);
   };
+
+  /* ================= MODAL WRAPPER ================= */
+  const renderModal = (content: React.ReactNode) => (
+    <div className="modalOverlay" onClick={goHome}>
+      <div
+        className="modalContent"
+        onClick={(e) => e.stopPropagation()} // prevent closing when clicking inside
+      >
+        {content}
+      </div>
+    </div>
+  );
 
   /* ================= RENDER ================= */
   return (
@@ -177,8 +195,8 @@ export default function UserHome({ name, city, onLogout }: Props) {
                       className="dropdownItem"
                       onClick={() => {
                         setShowHelpCenter(true);
-                        setSelectedBrand(null);
-                        setSelectedShop(null);
+                        setShowContactPage(false);
+                        setShowReportPage(false);
                       }}
                     >
                       Help Center
@@ -188,11 +206,21 @@ export default function UserHome({ name, city, onLogout }: Props) {
                       onClick={() => {
                         setShowContactPage(true);
                         setShowHelpCenter(false);
+                        setShowReportPage(false);
                       }}
                     >
                       Contact Us
                     </div>
-                    <div className="dropdownItem">Report an Issue</div>
+                    <div
+                      className="dropdownItem"
+                      onClick={() => {
+                        setShowReportPage(true);
+                        setShowHelpCenter(false);
+                        setShowContactPage(false);
+                      }}
+                    >
+                      Report an Issue
+                    </div>
                     <div className="dropdownItem">FAQs</div>
                   </div>
                 )}
@@ -225,76 +253,11 @@ export default function UserHome({ name, city, onLogout }: Props) {
         </nav>
 
         {/* ================= MAIN CONTENT ================= */}
-        {showHelpCenter && !showContactPage && (
-          <div className="helpContainer">
-            <div className="helpHeader">
-              <h1>Help & Support</h1>
-              <button
-                className="backBtn"
-                onClick={() => setShowHelpCenter(false)}
-              >
-                ← Back
-              </button>
-            </div>
-
-            <div className="helpContent">
-              <section className="helpSection">
-                <h2>Getting Started</h2>
-                <p>
-                  Learn how to browse brands, select shops, add items to your
-                  cart, and place orders quickly and easily.
-                </p>
-              </section>
-
-              <section className="helpSection">
-                <h2>Orders</h2>
-                <ul>
-                  <li>Track pending orders</li>
-                  <li>View completed orders</li>
-                  <li>Cancel an order</li>
-                </ul>
-              </section>
-
-              <section className="helpSection">
-                <h2>Payments</h2>
-                <p>
-                  We support secure checkout and multiple payment methods. All
-                  transactions are encrypted for your safety.
-                </p>
-              </section>
-
-              <section className="helpSection">
-                <h2>Contact Support</h2>
-                <p>
-                  Still need help? Reach out to our support team and we’ll
-                  respond as soon as possible.
-                </p>
-                <button
-                  className="contactBtn"
-                  onClick={() => {
-                    setShowContactPage(true);
-                    setShowHelpCenter(false);
-                  }}
-                >
-                  Contact Us
-                </button>
-              </section>
-            </div>
-          </div>
-        )}
-
-        {/* ================= CONTACT PAGE SLIDE-IN ================= */}
-        {showContactPage && (
-          <div className="contactPageWrapper">
-            <ContactUs onBack={() => setShowContactPage(false)} />
-          </div>
-        )}
-
-        {/* ================= Existing Brand / Shop / Items ================= */}
-        {!showHelpCenter &&
-          !selectedBrand &&
+        {!selectedBrand &&
           !selectedShop &&
-          !showContactPage && (
+          !showHelpCenter &&
+          !showContactPage &&
+          !showReportPage && (
             <div className="itemsGrid">
               {Object.entries(brands).length ? (
                 Object.entries(brands).map(([brandName, items]) => (
@@ -311,10 +274,12 @@ export default function UserHome({ name, city, onLogout }: Props) {
             </div>
           )}
 
+        {/* BRAND LOCATIONS */}
         {selectedBrand &&
           !selectedShop &&
           !showHelpCenter &&
-          !showContactPage && (
+          !showContactPage &&
+          !showReportPage && (
             <>
               <div className="brandHeader">
                 <h2>{selectedBrand} Locations</h2>
@@ -343,37 +308,107 @@ export default function UserHome({ name, city, onLogout }: Props) {
             </>
           )}
 
-        {selectedShop && !showHelpCenter && !showContactPage && (
-          <div className="shopMenu">
-            <div className="shopHeader">
-              <h3>{selectedShop} Menu</h3>
-              <button onClick={() => setSelectedShop(null)}>← Back</button>
-            </div>
+        {/* SHOP MENU */}
+        {selectedShop &&
+          !showHelpCenter &&
+          !showContactPage &&
+          !showReportPage && (
+            <div className="shopMenu">
+              <div className="shopHeader">
+                <h3>{selectedShop} Menu</h3>
+                <button onClick={() => setSelectedShop(null)}>← Back</button>
+              </div>
 
-            <div className="categories">
-              {categories.map((cat) => (
-                <CategoryButton
-                  key={cat}
-                  category={cat}
-                  isActive={shopCategory === cat}
-                  onClick={() => setShopCategory(cat)}
-                />
-              ))}
-            </div>
+              <div className="categories">
+                {categories.map((cat) => (
+                  <CategoryButton
+                    key={cat}
+                    category={cat}
+                    isActive={shopCategory === cat}
+                    onClick={() => setShopCategory(cat)}
+                  />
+                ))}
+              </div>
 
-            <div className="itemsGrid">
-              {shopItems.length ? (
-                shopItems.map((item) => (
-                  <ItemCard key={item.id} item={item} onAddToCart={addToCart} />
-                ))
-              ) : (
-                <p className="noResults">
-                  No items available in this category.
-                </p>
-              )}
+              <div className="itemsGrid">
+                {shopItems.length ? (
+                  shopItems.map((item) => (
+                    <ItemCard
+                      key={item.id}
+                      item={item}
+                      onAddToCart={addToCart}
+                    />
+                  ))
+                ) : (
+                  <p className="noResults">
+                    No items available in this category.
+                  </p>
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          )}
+
+        {/* ================= MODALS ================= */}
+        {showHelpCenter &&
+          renderModal(
+            <div className="helpContainer">
+              <div className="helpHeader">
+                <h1>Help & Support</h1>
+                <button
+                  className="backBtn"
+                  onClick={() => setShowHelpCenter(false)}
+                >
+                  ← Back
+                </button>
+              </div>
+              <div className="helpContent">
+                <section className="helpSection">
+                  <h2>Getting Started</h2>
+                  <p>
+                    Learn how to browse brands, select shops, add items to your
+                    cart, and place orders quickly and easily.
+                  </p>
+                </section>
+                <section className="helpSection">
+                  <h2>Orders</h2>
+                  <ul>
+                    <li>Track pending orders</li>
+                    <li>View completed orders</li>
+                    <li>Cancel an order</li>
+                  </ul>
+                </section>
+                <section className="helpSection">
+                  <h2>Payments</h2>
+                  <p>
+                    We support secure checkout and multiple payment methods. All
+                    transactions are encrypted for your safety.
+                  </p>
+                </section>
+                <section className="helpSection">
+                  <h2>Contact Support</h2>
+                  <p>
+                    Still need help? Reach out to our support team and we’ll
+                    respond as soon as possible.
+                  </p>
+                  <button
+                    className="contactBtn"
+                    onClick={() => {
+                      setShowContactPage(true);
+                      setShowHelpCenter(false);
+                    }}
+                  >
+                    Contact Us
+                  </button>
+                </section>
+              </div>
+            </div>
+          )}
+
+        {showContactPage &&
+          renderModal(<ContactUs onBack={() => setShowContactPage(false)} />)}
+
+        {showReportPage &&
+          renderModal(<ReportIssue onBack={() => setShowReportPage(false)} />)}
       </div>
     </div>
   );
