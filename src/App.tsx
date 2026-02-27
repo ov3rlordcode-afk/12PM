@@ -6,6 +6,7 @@ import DriverDashboard from "./user/drivers/Driver";
 import OperatorDashboard from "./user/operator/operator";
 import DriverSteps from "./steps/driverssteps";
 import UserSteps from "./steps/usersteps";
+import Help from "./help/help";
 
 type Role = "Customer" | "Driver" | "Operator" | "";
 type Step = 1 | 2 | 3 | 4 | 5 | 6 | 7; // <-- added new steps

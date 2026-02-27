@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useMemo, useState } from "react";
 import "./UserHome.css";
 import { mockItems, Item, categories } from "./mockItems";
@@ -23,6 +25,9 @@ export default function UserHome({ name, city, onLogout }: Props) {
   // Separate dropdown states
   const [ordersDropdownOpen, setOrdersDropdownOpen] = useState(false);
   const [supportDropdownOpen, setSupportDropdownOpen] = useState(false);
+
+  // Help Center state
+  const [showHelpCenter, setShowHelpCenter] = useState(false);
 
   const [cart, setCart] = useState<Item[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
@@ -106,6 +111,7 @@ export default function UserHome({ name, city, onLogout }: Props) {
     setSelectedShop(null);
     setShopCategory("All");
     setSearch("");
+    setShowHelpCenter(false);
   };
 
   const selectBrand = (brand: string) => {
@@ -113,12 +119,14 @@ export default function UserHome({ name, city, onLogout }: Props) {
     setSelectedShop(null);
     setShopCategory("All");
     setSearch("");
+    setShowHelpCenter(false);
   };
 
   const selectShop = (shop: string) => {
     setSelectedShop(shop);
     setShopCategory("All");
     setSearch("");
+    setShowHelpCenter(false);
   };
 
   /* ================= RENDER ================= */
@@ -163,7 +171,16 @@ export default function UserHome({ name, city, onLogout }: Props) {
                 Support
                 {supportDropdownOpen && (
                   <div className="dropdownMenu">
-                    <div className="dropdownItem">Help Center</div>
+                    <div
+                      className="dropdownItem"
+                      onClick={() => {
+                        setShowHelpCenter(true);
+                        setSelectedBrand(null);
+                        setSelectedShop(null);
+                      }}
+                    >
+                      Help Center
+                    </div>
                     <div className="dropdownItem">Contact Us</div>
                     <div className="dropdownItem">Report an Issue</div>
                     <div className="dropdownItem">FAQs</div>
@@ -197,8 +214,58 @@ export default function UserHome({ name, city, onLogout }: Props) {
           </div>
         </nav>
 
-        {/* MAIN CONTENT */}
-        {!selectedBrand && !selectedShop && (
+        {/* ================= MAIN CONTENT ================= */}
+        {showHelpCenter && (
+          <div className="helpContainer">
+            <div className="helpHeader">
+              <h1>Help & Support</h1>
+              <button
+                className="backBtn"
+                onClick={() => setShowHelpCenter(false)}
+              >
+                ← Back
+              </button>
+            </div>
+
+            <div className="helpContent">
+              <section className="helpSection">
+                <h2>Getting Started</h2>
+                <p>
+                  Learn how to browse brands, select shops, add items to your
+                  cart, and place orders quickly and easily.
+                </p>
+              </section>
+
+              <section className="helpSection">
+                <h2>Orders</h2>
+                <ul>
+                  <li>Track pending orders</li>
+                  <li>View completed orders</li>
+                  <li>Cancel an order</li>
+                </ul>
+              </section>
+
+              <section className="helpSection">
+                <h2>Payments</h2>
+                <p>
+                  We support secure checkout and multiple payment methods. All
+                  transactions are encrypted for your safety.
+                </p>
+              </section>
+
+              <section className="helpSection">
+                <h2>Contact Support</h2>
+                <p>
+                  Still need help? Reach out to our support team and we’ll
+                  respond as soon as possible.
+                </p>
+                <button className="contactBtn">Contact Us</button>
+              </section>
+            </div>
+          </div>
+        )}
+
+        {!showHelpCenter && !selectedBrand && !selectedShop && (
           <div className="itemsGrid">
             {Object.entries(brands).length ? (
               Object.entries(brands).map(([brandName, items]) => (
@@ -215,7 +282,7 @@ export default function UserHome({ name, city, onLogout }: Props) {
           </div>
         )}
 
-        {selectedBrand && !selectedShop && (
+        {selectedBrand && !selectedShop && !showHelpCenter && (
           <>
             <div className="brandHeader">
               <h2>{selectedBrand} Locations</h2>
@@ -244,7 +311,7 @@ export default function UserHome({ name, city, onLogout }: Props) {
           </>
         )}
 
-        {selectedShop && (
+        {selectedShop && !showHelpCenter && (
           <div className="shopMenu">
             <div className="shopHeader">
               <h3>{selectedShop} Menu</h3>
