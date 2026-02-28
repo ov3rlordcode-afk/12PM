@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { Item } from "../../mockItems";
+import { Item } from "./mockItems";
 import "./Cart.css";
 
 type Props = {

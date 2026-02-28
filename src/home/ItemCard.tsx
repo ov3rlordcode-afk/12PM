@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Item } from "../mockItems";
+import { Item } from "./mockItems";
 
 type Props = {
   item: Item;

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./LocationCard.css";
-import Reviews from "../reviews/Reviews"; // Ensure correct path
+import Reviews from "./Reviews"; // Ensure correct path
 
 type OpenHours = Record<string, { open: string; close: string }>;
 
