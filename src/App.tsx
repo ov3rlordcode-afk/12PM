@@ -1,9 +1,11 @@
 import { useState, useRef, useEffect } from "react";
 import "./App.css";
+import "./help/help.css";
+
 import Header from "./Header";
 import UserHome from "./home/UserHome";
-import DriverDashboard from "./user/drivers/Driver";
-import OperatorDashboard from "./user/operator/operator";
+import DriverDashboard from "./client/drivers/Driver";
+import OperatorDashboard from "./client/operator/operator";
 import DriverSteps from "./steps/driverssteps";
 import UserSteps from "./steps/usersteps";
 

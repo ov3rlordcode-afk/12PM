@@ -8,10 +8,9 @@ import {
   FaHeadset,
 } from "react-icons/fa";
 
-// Page Components
 function MyAccount() {
   return (
-    <div>
+    <div className="content">
       <h2>My Account</h2>
       <p>Update your profile, change password, manage settings.</p>
     </div>
@@ -20,7 +19,7 @@ function MyAccount() {
 
 function Orders() {
   return (
-    <div>
+    <div className="content">
       <h2>Orders</h2>
       <ul>
         <li>Track pending orders</li>
@@ -33,7 +32,7 @@ function Orders() {
 
 function Payments() {
   return (
-    <div>
+    <div className="content">
       <h2>Payments</h2>
       <p>Manage payment methods and view transaction history.</p>
     </div>
@@ -43,7 +42,7 @@ function Payments() {
 function Support() {
   const [showModal, setShowModal] = useState(false);
   return (
-    <div>
+    <div className="content">
       <h2>Support</h2>
       <p>Contact our support team if you need assistance.</p>
       <button onClick={() => setShowModal(true)}>Contact Us</button>
@@ -66,7 +65,6 @@ function Support() {
   );
 }
 
-// Main App / Dashboard
 export default function Dashboard() {
   const [activePage, setActivePage] = useState<
     "account" | "orders" | "payments" | "support"
@@ -87,9 +85,9 @@ export default function Dashboard() {
 
   return (
     <div className="dashboard">
-      <nav className="sidebar">
-        <h1>Dashboard</h1>
-        <ul>
+      <aside className="sidebar">
+        <h1 className="sidebarLogo">Dashboard</h1>
+        <ul className="sidebarMenu">
           <li onClick={() => setActivePage("account")}>
             <FaUser /> My Account
           </li>
@@ -103,7 +101,7 @@ export default function Dashboard() {
             <FaHeadset /> Support
           </li>
         </ul>
-      </nav>
+      </aside>
       <main className="pageContent">{renderPage()}</main>
     </div>
   );

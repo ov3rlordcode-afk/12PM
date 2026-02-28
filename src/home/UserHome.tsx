@@ -15,11 +15,7 @@ import Cart from "./components/cart/Cart";
 import ContactUs from "../help/contactus";
 import ReportIssue from "../help/reportissue";
 
-type Props = {
-  name: string;
-  city: string;
-  onLogout: () => void;
-};
+type Props = { name: string; city: string; onLogout: () => void };
 
 export default function UserHome({ name, city, onLogout }: Props) {
   const [search, setSearch] = useState("");
@@ -27,26 +23,26 @@ export default function UserHome({ name, city, onLogout }: Props) {
   const [selectedShop, setSelectedShop] = useState<string | null>(null);
   const [shopCategory, setShopCategory] = useState("All");
 
-  const [ordersDropdownOpen, setOrdersDropdownOpen] = useState(false);
-  const [supportDropdownOpen, setSupportDropdownOpen] = useState(false);
-
-  const [showHelpCenter, setShowHelpCenter] = useState(false);
-  const [showContactPage, setShowContactPage] = useState(false);
-  const [showReportPage, setShowReportPage] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
+  const [showContact, setShowContact] = useState(false);
+  const [showReport, setShowReport] = useState(false);
+  const [showAccount, setShowAccount] = useState(false);
 
   const [cart, setCart] = useState<Item[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(false);
 
-  /* ================= FILTERED DATA ================= */
-  const filteredItems = useMemo(() => {
-    return mockItems.filter((item) =>
-      [item.name, item.shop, item.brand]
-        .join(" ")
-        .toLowerCase()
-        .includes(search.toLowerCase())
-    );
-  }, [search]);
+  // Filter items
+  const filteredItems = useMemo(
+    () =>
+      mockItems.filter((item) =>
+        [item.name, item.shop, item.brand]
+          .join(" ")
+          .toLowerCase()
+          .includes(search.toLowerCase())
+      ),
+    [search]
+  );
 
   const brands = useMemo(() => {
     const grouped: Record<string, Item[]> = {};
@@ -82,16 +78,13 @@ export default function UserHome({ name, city, onLogout }: Props) {
     [cart]
   );
 
-  /* ================= CART ACTIONS ================= */
+  // Cart actions
   const addToCart = (item: Item) => {
     setCart((prev) => [...prev, item]);
     setCartOpen(true);
   };
-
-  const removeFromCart = (index: number) => {
+  const removeFromCart = (index: number) =>
     setCart((prev) => prev.filter((_, i) => i !== index));
-  };
-
   const placeOrder = () => {
     if (!cart.length) return;
     const orders = JSON.parse(localStorage.getItem("orders") || "[]");
@@ -110,49 +103,29 @@ export default function UserHome({ name, city, onLogout }: Props) {
     setOrderSuccess(true);
   };
 
-  /* ================= NAVIGATION ================= */
+  // Navigation
   const goHome = () => {
     setSelectedBrand(null);
     setSelectedShop(null);
     setShopCategory("All");
     setSearch("");
-    setShowHelpCenter(false);
-    setShowContactPage(false);
-    setShowReportPage(false);
+    setShowHelp(false);
+    setShowContact(false);
+    setShowReport(false);
+    setShowAccount(false);
   };
-
   const selectBrand = (brand: string) => {
     setSelectedBrand(brand);
     setSelectedShop(null);
     setShopCategory("All");
     setSearch("");
-    setShowHelpCenter(false);
-    setShowContactPage(false);
-    setShowReportPage(false);
   };
-
   const selectShop = (shop: string) => {
     setSelectedShop(shop);
     setShopCategory("All");
     setSearch("");
-    setShowHelpCenter(false);
-    setShowContactPage(false);
-    setShowReportPage(false);
   };
 
-  /* ================= MODAL WRAPPER ================= */
-  const renderModal = (content: React.ReactNode) => (
-    <div className="modalOverlay" onClick={goHome}>
-      <div
-        className="modalContent"
-        onClick={(e) => e.stopPropagation()} // prevent closing when clicking inside
-      >
-        {content}
-      </div>
-    </div>
-  );
-
-  /* ================= RENDER ================= */
   return (
     <div className="userHome">
       <div className="boxedContainer">
@@ -167,64 +140,6 @@ export default function UserHome({ name, city, onLogout }: Props) {
               <li onClick={() => selectBrand("")}>Brands</li>
               <li onClick={goHome}>Items</li>
               <li onClick={goHome}>Drivers</li>
-
-              <li
-                className="navItem"
-                onMouseEnter={() => setOrdersDropdownOpen(true)}
-                onMouseLeave={() => setOrdersDropdownOpen(false)}
-              >
-                Orders
-                {ordersDropdownOpen && (
-                  <div className="dropdownMenu">
-                    <div className="dropdownItem">Pending Orders</div>
-                    <div className="dropdownItem">Completed Orders</div>
-                    <div className="dropdownItem">Cancelled Orders</div>
-                  </div>
-                )}
-              </li>
-
-              <li
-                className="navItem"
-                onMouseEnter={() => setSupportDropdownOpen(true)}
-                onMouseLeave={() => setSupportDropdownOpen(false)}
-              >
-                Support
-                {supportDropdownOpen && (
-                  <div className="dropdownMenu">
-                    <div
-                      className="dropdownItem"
-                      onClick={() => {
-                        setShowHelpCenter(true);
-                        setShowContactPage(false);
-                        setShowReportPage(false);
-                      }}
-                    >
-                      Help Center
-                    </div>
-                    <div
-                      className="dropdownItem"
-                      onClick={() => {
-                        setShowContactPage(true);
-                        setShowHelpCenter(false);
-                        setShowReportPage(false);
-                      }}
-                    >
-                      Contact Us
-                    </div>
-                    <div
-                      className="dropdownItem"
-                      onClick={() => {
-                        setShowReportPage(true);
-                        setShowHelpCenter(false);
-                        setShowContactPage(false);
-                      }}
-                    >
-                      Report an Issue
-                    </div>
-                    <div className="dropdownItem">FAQs</div>
-                  </div>
-                )}
-              </li>
             </ul>
           </div>
 
@@ -236,7 +151,6 @@ export default function UserHome({ name, city, onLogout }: Props) {
               onChange={(e) => setSearch(e.target.value)}
               className="searchInput"
             />
-
             <Cart
               cart={cart}
               cartOpen={cartOpen}
@@ -247,39 +161,95 @@ export default function UserHome({ name, city, onLogout }: Props) {
               orderSuccess={orderSuccess}
               setOrderSuccess={setOrderSuccess}
             />
-
-            <AvatarDropdown onLogout={onLogout} />
+            <AvatarDropdown
+              onLogout={onLogout}
+              onAccount={() => {
+                setShowAccount(true);
+                setShowHelp(false);
+                setShowContact(false);
+                setShowReport(false);
+                setSelectedBrand(null);
+                setSelectedShop(null);
+              }}
+            />
           </div>
         </nav>
 
-        {/* ================= MAIN CONTENT ================= */}
-        {!selectedBrand &&
-          !selectedShop &&
-          !showHelpCenter &&
-          !showContactPage &&
-          !showReportPage && (
-            <div className="itemsGrid">
-              {Object.entries(brands).length ? (
-                Object.entries(brands).map(([brandName, items]) => (
-                  <BrandCard
-                    key={brandName}
-                    brandName={brandName}
-                    items={items}
-                    onViewBrand={() => selectBrand(brandName)}
-                  />
-                ))
-              ) : (
-                <p className="noResults">No brands found.</p>
-              )}
+        {/* ================= PAGE CONTENT ================= */}
+        <div className="pageContent">
+          {/* My Account */}
+          {showAccount && <MyAccount onBack={goHome} />}
+
+          {/* Help */}
+          {showHelp && (
+            <div className="content">
+              <h1>Help & Support</h1>
+              <button className="backBtn" onClick={goHome}>
+                ← Back
+              </button>
+              <h2>Getting Started</h2>
+              <p>
+                Learn how to browse brands, select shops, add items to your
+                cart, and place orders quickly and easily.
+              </p>
+              <h2>Orders</h2>
+              <ul>
+                <li>Track pending orders</li>
+                <li>View completed orders</li>
+                <li>Cancel an order</li>
+              </ul>
+              <h2>Payments</h2>
+              <p>
+                We support secure checkout and multiple payment methods. All
+                transactions are encrypted for your safety.
+              </p>
+              <h2>Contact Support</h2>
+              <p>
+                Still need help? Reach out to our support team and we’ll respond
+                as soon as possible.
+              </p>
+              <button
+                onClick={() => {
+                  setShowContact(true);
+                  setShowHelp(false);
+                }}
+              >
+                Contact Us
+              </button>
             </div>
           )}
 
-        {/* BRAND LOCATIONS */}
-        {selectedBrand &&
-          !selectedShop &&
-          !showHelpCenter &&
-          !showContactPage &&
-          !showReportPage && (
+          {/* Contact Page */}
+          {showContact && <ContactUs onBack={goHome} />}
+
+          {/* Report Page */}
+          {showReport && <ReportIssue onBack={goHome} />}
+
+          {/* Brands Overview */}
+          {!selectedBrand &&
+            !selectedShop &&
+            !showHelp &&
+            !showContact &&
+            !showReport &&
+            !showAccount && (
+              <div className="itemsGrid">
+                {Object.entries(brands).length ? (
+                  Object.entries(brands).map(([brandName, items]) => (
+                    <BrandCard
+                      key={brandName}
+                      brandName={brandName}
+                      items={items}
+                      onViewBrand={() => selectBrand(brandName)}
+                    />
+                  ))
+                ) : (
+                  <p className="noResults">No brands found.</p>
+                )}
+              </div>
+            )}
+
+          {/* Brand Locations */}
+          {selectedBrand && !selectedShop && (
             <>
               <div className="brandHeader">
                 <h2>{selectedBrand} Locations</h2>
@@ -287,7 +257,6 @@ export default function UserHome({ name, city, onLogout }: Props) {
                   ← Back
                 </button>
               </div>
-
               <div className="itemsGrid">
                 {brandLocations.length ? (
                   brandLocations.map((shop) => (
@@ -308,17 +277,13 @@ export default function UserHome({ name, city, onLogout }: Props) {
             </>
           )}
 
-        {/* SHOP MENU */}
-        {selectedShop &&
-          !showHelpCenter &&
-          !showContactPage &&
-          !showReportPage && (
+          {/* Shop Items */}
+          {selectedShop && (
             <div className="shopMenu">
               <div className="shopHeader">
                 <h3>{selectedShop} Menu</h3>
                 <button onClick={() => setSelectedShop(null)}>← Back</button>
               </div>
-
               <div className="categories">
                 {categories.map((cat) => (
                   <CategoryButton
@@ -329,7 +294,6 @@ export default function UserHome({ name, city, onLogout }: Props) {
                   />
                 ))}
               </div>
-
               <div className="itemsGrid">
                 {shopItems.length ? (
                   shopItems.map((item) => (
@@ -347,68 +311,7 @@ export default function UserHome({ name, city, onLogout }: Props) {
               </div>
             </div>
           )}
-
-        {/* ================= MODALS ================= */}
-        {showHelpCenter &&
-          renderModal(
-            <div className="helpContainer">
-              <div className="helpHeader">
-                <h1>Help & Support</h1>
-                <button
-                  className="backBtn"
-                  onClick={() => setShowHelpCenter(false)}
-                >
-                  ← Back
-                </button>
-              </div>
-              <div className="helpContent">
-                <section className="helpSection">
-                  <h2>Getting Started</h2>
-                  <p>
-                    Learn how to browse brands, select shops, add items to your
-                    cart, and place orders quickly and easily.
-                  </p>
-                </section>
-                <section className="helpSection">
-                  <h2>Orders</h2>
-                  <ul>
-                    <li>Track pending orders</li>
-                    <li>View completed orders</li>
-                    <li>Cancel an order</li>
-                  </ul>
-                </section>
-                <section className="helpSection">
-                  <h2>Payments</h2>
-                  <p>
-                    We support secure checkout and multiple payment methods. All
-                    transactions are encrypted for your safety.
-                  </p>
-                </section>
-                <section className="helpSection">
-                  <h2>Contact Support</h2>
-                  <p>
-                    Still need help? Reach out to our support team and we’ll
-                    respond as soon as possible.
-                  </p>
-                  <button
-                    className="contactBtn"
-                    onClick={() => {
-                      setShowContactPage(true);
-                      setShowHelpCenter(false);
-                    }}
-                  >
-                    Contact Us
-                  </button>
-                </section>
-              </div>
-            </div>
-          )}
-
-        {showContactPage &&
-          renderModal(<ContactUs onBack={() => setShowContactPage(false)} />)}
-
-        {showReportPage &&
-          renderModal(<ReportIssue onBack={() => setShowReportPage(false)} />)}
+        </div>
       </div>
     </div>
   );
